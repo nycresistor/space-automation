@@ -1,0 +1,127 @@
+homeassistant:
+  # Name of the location where Home Assistant is running
+  name: NYCR
+  # Location required to calculate the time the sun rises and sets
+  latitude: !secret nyc_latitude
+  longitude: !secret nyc_longitude
+  # Impacts weather/sunrise data (altitude above sea level in meters)
+  elevation: 
+  # metric for Metric, imperial for Imperial
+  unit_system: metric
+  # Pick yours from here: http://en.wikipedia.org/wiki/List_of_tz_database_time_zones
+  time_zone: America/New_York
+  # Customization file
+  customize: !include customize.yaml
+
+# Show links to resources in log and frontend
+# introduction:
+
+# Enables the frontend
+frontend:
+  themes: !include_dir_merge_named themes/
+
+# Enables configuration UI
+config:
+
+# Enable ios app integration (I think)
+ios:
+
+# Enable MQ Telemetry Transport protocol
+mqtt:
+  broker: 127.0.0.1
+  port: 1883
+  username: !secret mqtt_username
+  password: !secret mqtt_password
+
+#sad_lamp:
+#  topic: sad_lamp
+
+http:
+  # Secrets are defined in the file secrets.yaml
+  # api_password: !secret http_password
+  # Uncomment this if you are using SSL/TLS, running in Docker container, etc.
+  # base_url: example.duckdns.org:8123
+
+# Checks for available updates
+# Note: This component will send some information about your system to
+# the developers to assist with development of Home Assistant.
+# For more information, please see:
+# https://home-assistant.io/blog/2016/10/25/explaining-the-updater/
+updater:
+  # Optional, allows Home Assistant developers to focus on popular components.
+  # include_used_components: true
+
+# Discover some devices automatically
+# commenting out to try to not have *everything* show up on the dashboard
+discovery:
+
+# Allows you to issue voice commands from the frontend in enabled browsers
+conversation:
+
+# Enables support for tracking state changes over time
+history:
+
+# View all events in a logbook
+logbook:
+
+# Enables a map showing the location of tracked devices
+map:
+
+# Track the sun
+sun:
+
+# Recognize workdays for automations
+# example:
+#binary_sensor:
+#  - platform: workday
+#    country: US
+#    workdays: [ mon, tue, wed, thu, fri ]
+
+# Spotify
+# example
+#media_player:
+# - platform: spotify
+#    client_id: !secret spotify_id
+#    client_secret: !secret spotify_secret
+
+# Weather prediction
+sensor:
+  - platform: yr
+
+# Text to speech
+tts:
+  #- platform: google
+
+# Cloud
+cloud:
+
+#light tower1:
+#  platform: tradfri
+#light tower2:
+#  platform: tradfri
+#light tower3:
+#  platform: tradfri
+
+#light kitchen1:
+#  platform: hue
+#light kitchen2:
+#  platform: hue
+#light kitchen3:
+#  platform: hue
+
+#light:
+#  - platform: mqtt
+#    name: "Sad Lamp"
+#    command_topic: "hass/feeds/sad-lamp.command"
+#    state_topic: "hass/feeds/sad-lamp.state"
+
+input_select: !include input_select.yaml
+
+group: !include_dir_merge_named groups/
+
+scene: !include scenes.yaml
+
+automation: !include automations.yaml
+        
+script: !include scripts.yaml
+

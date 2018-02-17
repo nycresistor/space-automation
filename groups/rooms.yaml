@@ -1,0 +1,16 @@
+# File for general groups of things by room or component type
+#
+#examples:
+#
+#entry:
+#  name: Entry
+#  entities:
+#    - light.entry1
+#    - light.entry2
+#living:
+#  name: Living Room
+#  entities:
+#    - light.track1
+#    - light.track2
+#    - light.track3
+#    - light.track4

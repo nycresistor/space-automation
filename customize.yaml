@@ -1,0 +1,27 @@
+# THIS is where you set up how the display on the web and mobile HA app
+# should look.  You can set the icons, what tiles/cards are displayed, etc.
+#
+# for icons goto: https://materialdesignicons.com/
+
+# examples:
+#
+## Dashboard Cards
+# group.lights_card:
+#  friendly_name: Lights
+#group.scenes_card:
+#  friendly_name: Scenes
+#media_player.spotify:
+#  friendly_name: Spotify
+#group.themes_card:
+#  friendly_name: Themes
+
+# Lights Card
+#group.entry:
+#  icon: mdi:door
+#  friendly_name: Entry  
+#group.living:
+#  icon: mdi:sofa
+#  friendly_name: Living Room  
+#group.tower:
+#  icon: mdi:castle
+#  friendly_name: Tower  
