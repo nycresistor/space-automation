@@ -8,13 +8,11 @@
 ####
 # for booleans variations of On Yes Y Off No N will be replaced with true/false
 
-# example:
-#
-#frontend_theme:
-#  name: Themes
-#  icon: mdi:theme-light-dark
-#  options:
-#    - pmxmonolight
-#    - pmxmononight
-#    - dark 
+frontend_theme:
+  name: Themes
+  icon: mdi:theme-light-dark
+  options:
+    - pmxmonolight
+    - pmxmononight
+    - dark 
 

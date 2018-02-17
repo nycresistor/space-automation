@@ -37,23 +37,24 @@
 #        brightness: 255
 #        # 1200 seconds = 20 min
 #        transition: 1200
-### Triggering Frontend Themes
-#- alias: 'startup theme'
-#  initial_state: 'on'
-#  trigger:
-#    platform: homeassistant
-#    event: start
-#  action:
-#    service: frontend.set_theme
-#    data:
-#      name: pmxmonolight
-## set theme only works on mobile for some reason
-#- alias: 'select theme'
-#  initial_state: 'on'
-#  trigger:
-#    platform: state
-#    entity_id: input_select.frontend_theme
-#  action:
-#    service: frontend.set_theme
-#    data_template:
-#      name: "{{ states.input_select.frontend_theme.state }}"
+
+## Triggering Frontend Themes
+- alias: 'startup theme'
+  initial_state: 'on'
+  trigger:
+    platform: homeassistant
+    event: start
+  action:
+    service: frontend.set_theme
+    data:
+      name: pmxmonolight
+# set theme only works on mobile for some reason
+- alias: 'select theme'
+  initial_state: 'on'
+  trigger:
+    platform: state
+    entity_id: input_select.frontend_theme
+  action:
+    service: frontend.set_theme
+    data_template:
+      name: "{{ states.input_select.frontend_theme.state }}"

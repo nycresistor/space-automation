@@ -1,15 +1,10 @@
 # A view is a tab.  view: yes means "make this a tab"
 # the default_view is the main tab
 
-# examples:
-#
-#default_view:
-#  view: yes
-#  entities:
-#    - group.lights_card
-#    - group.scenes_card
-#    - media_player.spotify
-#    - group.themes_card
+default_view:
+  view: yes
+  entities:
+    - group.themes_card
 ## The cards
 #lights_card:
 #  name: Lights
