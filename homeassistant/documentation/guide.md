@@ -1,6 +1,20 @@
 # Important Stuff
 
-The configuration files for Home Assistant live in `~/.homeassistant/` and symlink to the files here.  If stuff broken, is everything symlinked correctly?
+To start home assistant if it is not running:
+
+```bash
+hass -c /home/holly/space-automation/homeassistant
+```
+
+or, if that doesn't work for some reason:
+
+```bash
+hass -c /etc/space-automation/homeassistant
+```
+
+The configuration files for Home Assistant live in `/home/holly/space-automation/homeassistant/` and symlink to the files in `/etc/space-automation/homeassistant` where they can be accessed for editing by anyone in the group automation.  If you would like to edit the configs, ask to be added to the automation group by an administrator (George, Holly, etc.)
+
+The directory is under version control, don't forget to check in and push your changes.
 
 # Light settings
 
