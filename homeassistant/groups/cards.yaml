@@ -5,7 +5,16 @@ default_view:
   view: yes
   entities:
     - group.themes_card
+
 ## The cards
+
+themes_card:
+  name: Themes
+  entities:
+  - input_select.frontend_theme
+
+# example:
+#
 #lights_card:
 #  name: Lights
 #  entities:
