@@ -27,11 +27,28 @@ config:
 ios:
 
 # Enable MQ Telemetry Transport protocol
-#mqtt:
-#  broker: 127.0.0.1
-#  port: 1883
-#  username: !secret mqtt_username
-#  password: !secret mqtt_password
+mqtt:
+  embedded: 
+    listeners:
+      default:
+        type: tcp
+        max-connections: 5000
+      internal_tcp_1:
+        bind: 127.0.0.1:1882
+      external_tcp_1:
+        bind: 0.0.0.0:1883
+      ws-1:
+        bind: 0.0.0.0:8081
+        type: ws
+  broker: 127.0.0.1
+  port: 1882
+  discovery: true
+
+logger:
+  default: warning
+  logs:
+    homeassistant.components.mqtt: debug
+
 
 #sad_lamp:
 #  topic: sad_lamp
@@ -123,5 +140,5 @@ scene: !include scenes.yaml
 
 automation: !include automations.yaml
         
-script: !include scripts.yaml
+#script: !include scripts.yaml
 
