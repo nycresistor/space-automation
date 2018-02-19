@@ -147,11 +147,11 @@ automation: !include automations.yaml
 binary_sensor 18fe34d40b4d:
   - name:		"Motion sensor"
     platform:		mqtt
-    state_topic:	"/18fe34d40b4d/in1/state"
+    state_topic:	"/18fe34d40b4d/in0/state"
 
   - name:		"Front door"
     platform:		mqtt
-    state_topic:	"/18fe34d40b4d/in2/state"
+    state_topic:	"/18fe34d40b4d/in1/state"
 
 light 18fe34d40b4d:
   - name:		"Thing Red"
