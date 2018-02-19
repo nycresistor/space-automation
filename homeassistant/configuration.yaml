@@ -145,18 +145,17 @@ automation: !include automations.yaml
 # 18fe34d40b4d is an Adafruit Huzzah ESP8266 with the gpiothing firmware
 # The LEDs on the board are wired backwards
 binary_sensor:
-  platform: mqtt
-  name: "Motion sensor"
-  state_topic: "/18fe34d40b4d/in1/state"
-  payload_on: "ON"
-  payload_off: "OFF"
+  - name: "Motion sensor"
+    platform: mqtt
+    state_topic: "/18fe34d40b4d/in1/state"
+    payload_on: "ON"
+    payload_off: "OFF"
 
-binary_sensor:
-  platform: mqtt
-  name: "Front door"
-  state_topic: "/18fe34d40b4d/in2/state"
-  payload_on: "ON"
-  payload_off: "OFF"
+  - name: "Front door"
+    platform: mqtt
+    state_topic: "/18fe34d40b4d/in2/state"
+    payload_on: "ON"
+    payload_off: "OFF"
 
 light thing1-red:
   platform: mqtt
