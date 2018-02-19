@@ -21,43 +21,6 @@ The directory is under version control, don't forget to check in and push your c
 
 Home Assistant was installed by `pip3` and its non-user-editable files live in `/usr/lib/python3.6/site-packages/homeassistant`.
 
-# Light settings
-
-The kelvin and mired scales are inverse:
-
-* Kelvin: higher is BLUER.
-* Mired: higher is WARMER.
-
-In Home Assistant `color_temp` is mired and `kelvin` is kelvin.
-
-* Morning sun, energizing bluish: 9000-6000 kelvin, 120 - 160 mired.
-* Noon sun, regular daylight: 4100-3500 kelvin, 250 - 300 mired.
-* Warm light, soft white: 3000-2700 kelvin, 300 - 400 mired.
-* Candlelight: 2000 kelvin, 500 mired
-
-__Tradfri lights__
-
-The white spectrum lights take a `color_temp` from 250 to 450.
-
-__LIFX__
-
-These can get new settings while they're turned off, unlike the other bulbs.
-
-__Hue__
-
-# Useful commandline tools
-
-```bash
-$ hass --script check_config
-```
-
-You can get configuration data from the lights with [scenegen](https://github.com/home-assistant/scenegen). So you can set up all your lights exactly how you want them for a scene, then run scenegen and use the output to fill in your scene configuration file.  However, this will not give you `rgb_color` data, only `color_temp` and `brightness`, so you'll need to put any colors in by hand.
-
-```bash
-$ python3 scenegen.py http://10.0.[redacted]
-```
-**If you include the slash at the end of the url it won't work.**
-
 # Configuration
 
 ## Front End
@@ -100,4 +63,46 @@ lights_card:
 
 And then reference that card group in the default_view group, or whatever group that represents the tab that you want it on.
 
+
+# Useful commandline tools
+
+If you want to check that your config file is valid without restarting the service (because yaml):
+
+```bash
+$ hass --script check_config -c /etc/space-automation/homeassistant
+```
+
+You can get configuration data from the lights with [scenegen](https://github.com/home-assistant/scenegen). So you can set up all your lights exactly how you want them for a scene, then run scenegen and use the output to fill in your scene configuration file.  However, this will not give you `rgb_color` data, only `color_temp` and `brightness`, so you'll need to put any colors in by hand.
+
+```bash
+$ python3 scenegen.py http://10.0.[redacted]
+```
+**If you include the slash at the end of the url it won't work.**
+
+
+# Light settings
+
+(NOTE:  We don't have any lights under control yet.  This is just a reference for if we do.)
+
+The kelvin and mired scales are inverse:
+
+* Kelvin: higher is BLUER.
+* Mired: higher is WARMER.
+
+In Home Assistant `color_temp` is mired and `kelvin` is kelvin.
+
+* Morning sun, energizing bluish: 9000-6000 kelvin, 120 - 160 mired.
+* Noon sun, regular daylight: 4100-3500 kelvin, 250 - 300 mired.
+* Warm light, soft white: 3000-2700 kelvin, 300 - 400 mired.
+* Candlelight: 2000 kelvin, 500 mired
+
+__Tradfri lights__
+
+The white spectrum lights take a `color_temp` from 250 to 450.
+
+__LIFX__
+
+These can get new settings while they're turned off, unlike the other bulbs.
+
+__Hue__
 
