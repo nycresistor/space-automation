@@ -23,6 +23,15 @@ Home Assistant was installed by `pip3` and its non-user-editable files live in `
 
 # Configuration
 
+## Quick Tips
+
+If you plan to edit the config files in vi, add this to your `.exrc` or `.virc` or `.vimrc` or whatever the kids are using these days:
+
+```vim
+" keep the computer safe from being thrown across the room while writing yaml
+autocmd FileType yaml set tabstop=2|set shiftwidth=2|set expandtab
+```
+
 ## Front End
 
 ### How do I make a tab?
@@ -79,6 +88,11 @@ $ python3 scenegen.py http://10.0.[redacted]
 ```
 **If you include the slash at the end of the url it won't work.**
 
+# Components
+
+## Hexascroller
+
+Hexascroller stuff is on golden in `/opt/hexa` and `/etc/systemd/system/hexascroller.service`
 
 # Light settings
 
