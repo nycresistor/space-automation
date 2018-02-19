@@ -1,20 +1,25 @@
 # Important Stuff
 
-To start home assistant if it is not running:
+The service that orchestrates all of the "home automation" tasks in the space is Home Assistant.  Any lights, sensors, switches, etc., talk to it, and it provides a web and app front end for viewing and setting the state of all the things.  
+To view the front end visit `golden:8123` in your browser while you are connected to the space wifi.  This is system is not on the internet, so you will not be able to access it remotely.
+
+If that didn't work, maybe homeassistant isn't running?  To turn it on log into golden and run:
 
 ```bash
-hass -c /home/holly/space-automation/homeassistant
+$ hass -c /home/holly/space-automation/homeassistant
 ```
 
 or, if that doesn't work for some reason:
 
 ```bash
-hass -c /etc/space-automation/homeassistant
+$ hass -c /etc/space-automation/homeassistant
 ```
 
-The configuration files for Home Assistant live in `/home/holly/space-automation/homeassistant/` and symlink to the files in `/etc/space-automation/homeassistant` where they can be accessed for editing by anyone in the group automation.  If you would like to edit the configs, ask to be added to the automation group by an administrator (George, Holly, etc.)
+The configuration files for Home Assistant live in `/home/holly/space-automation/homeassistant/` and are symlinked to the files in `/etc/space-automation/homeassistant` where they can be accessed for editing by anyone in the group `automation`.  If you would like to edit the configs, ask to be added to the group by an administrator (George, Holly, etc.).
 
 The directory is under version control, don't forget to check in and push your changes.
+
+Home Assistant was installed by `pip3` and its non-user-editable files live in `/usr/lib/python3.6/site-packages/homeassistant`.
 
 # Light settings
 
