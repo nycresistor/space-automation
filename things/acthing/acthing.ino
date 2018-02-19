@@ -8,8 +8,21 @@
  * 0 bits are  860us low, then modulated high for 430us
  *
  * Each time the button is pressed it sends the command twice.
+ *
+ * The device listens for MQTT commands or serial port commands to
+ * send the OFF command.
  */
+#include "config.h"
 
+#include <ESP8266WiFi.h>
+#include <WiFiClient.h>
+
+WiFiClient wifi;
+
+// MQTT libraries for reporting status
+#include <PubSubClient.h>
+PubSubClient mqtt(wifi);
+static char device_id[16];
 #define IR_INPUT_PIN 14
 
 static const char off_cmd[] =
@@ -20,17 +33,26 @@ static const char off_cmd[] =
 "00000000" "01010011" "0";
 
 // this is the on command for 85F, swing h+v, 3 fan
-static const char on_cmd[] = 
+static const char heat_cmd[] = 
 "11100010" "01101001" "10110010" "01000000"
 "00000000" "00000010" "00001000" "01011000"
 "00000001" "11101111" "00000000" "00000000"
 "00000000" "00000000" "00000000" "00000000"
 "00000000" "01010000" "1";
 
+// this is the on command for 70F, swing h+v, 3 fan
+static const char cool_cmd[] =
+"11100010" "01101001" "10110010" "01000000"
+"00000000" "00000010" "00001000" "01010100"
+"00000001" "11101111" "00000000" "00000000"
+"00000000" "00000000" "00000000" "00000000"
+"00000000" "01011000" "1";
+
 void setup()
 {
 	pinMode(IR_INPUT_PIN, INPUT);
 	Serial.begin(115200);
+	thing_setup();
 }
 
 
@@ -126,19 +148,133 @@ void send_ir(const char * cmd)
 }
 
 
+
+int
+wifi_connect()
+{
+	int connAttempts = 0;
+
+	Serial.println(String(device_id) + " connecting to " + String(WIFI_SSID));
+	WiFi.persistent(false);
+	WiFi.mode(WIFI_STA);
+	WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
+	Serial.print(".");
+
+	while (WiFi.status() != WL_CONNECTED ) {
+		delay(500);
+		Serial.print(".");
+		if(connAttempts > 20)
+			return -5;
+		connAttempts++;
+	}
+
+	Serial.println("WiFi connected\r\n");
+	Serial.print("IP address: ");
+	Serial.println(WiFi.localIP());
+	return 1;
+}
+
+
+void
+mqtt_connect()
+{
+	static long last_mqtt_connect;
+
+	if (mqtt.connected() || millis() - last_mqtt_connect < 5000)
+		return;
+
+	last_mqtt_connect = millis();
+
+	Serial.print("mqtt: Trying to connect ");
+	Serial.print(MQTT_SERVER);
+
+	mqtt.setServer(MQTT_SERVER, MQTT_PORT);
+
+	if (!mqtt.connect("gpiothing", MQTT_USER, MQTT_PASSWORD))
+	{
+		Serial.println(" fail");
+		return;
+	}
+
+	Serial.println(" success");
+
+	// subscribe to all of our output status bits
+	char buf[32];
+	snprintf(buf, sizeof(buf), "/%s/ac/status", device_id);
+	mqtt.subscribe(buf);
+	Serial.println(buf);
+}
+
+
+static void
+mqtt_callback(
+	char * topic,
+	byte * payload,
+	unsigned int len
+)
+{
+	Serial.print("MQTT: ");
+	Serial.print(topic);
+	Serial.print("'");
+	Serial.write(payload, len);
+	Serial.println("'");
+
+	const char * msg = (const char *) payload;
+
+	if (strncmp(msg, "HEAT", len) == 0)
+	{
+		send_ir(heat_cmd);
+		delay(100);
+		send_ir(heat_cmd);
+	} else
+	if (strncmp(msg, "COOL", len) == 0)
+	{
+		send_ir(cool_cmd);
+		delay(100);
+		send_ir(cool_cmd);
+	} else
+	if (strncmp(msg, "OFF", len) == 0)
+	{
+		send_ir(off_cmd);
+		delay(100);
+		send_ir(off_cmd);
+	} else {
+		Serial.println("UNKNOWN COMMAND");
+		return;
+	}
+}
+ 
+
+void thing_setup()
+{ 
+	uint8_t mac_bytes[6];
+	WiFi.macAddress(mac_bytes);
+	snprintf(device_id, sizeof(device_id), "%02x%02x%02x%02x%02x%02x",
+		mac_bytes[0],
+		mac_bytes[1],
+		mac_bytes[2],
+		mac_bytes[3],
+		mac_bytes[4],
+		mac_bytes[5]
+	);
+
+	wifi_connect();
+	configTime(1, 3600, "pool.ntp.org");
+
+	mqtt.setCallback(mqtt_callback);
+	mqtt_connect();
+}
+
+
 void loop()
 {
-/*
-	const int bit = digitalRead(IR_INPUT_PIN);
-		Serial.print(micros());
-		Serial.print(" ");
-		Serial.println(bit);
-	return;
-*/
-
 	// wait for a sync pulse or a command from the serial port
 	while(1)
 	{
+		mqtt.loop();
+		if(!mqtt.connected())
+			mqtt_connect();
+
 		if (Serial.available())
 		{
 			if (Serial.read() == '\n')
@@ -197,3 +333,4 @@ void loop()
 
 	Serial.println();
 }
+
