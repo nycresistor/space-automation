@@ -1,7 +1,7 @@
 /** \file
  * Home automation thing with MQTT.
  *
- * This configures some of the GPIO lines as inputs WITHOUT pullup and
+ * This configures some of the GPIO lines as inputs with pullup and
  * reports them to the MQTT server.  It also has some outputs and
  * accepts commands from the server to turn them on and off.
  *
@@ -149,17 +149,22 @@ mqtt_callback(
 	}
 
 	const unsigned pin = output_pins[id - '0'];
+	unsigned val = 0;
 
 	if (strncmp(msg, "ON", len) == 0)
 	{
-		digitalWrite(pin, 1);
+		val = 1;
 	} else
 	if (strncmp(msg, "OFF", len) == 0)
 	{
-		digitalWrite(pin, 0);
+		val = 0;
 	} else {
 		Serial.println("UNKNOWN COMMAND");
+		return;
 	}
+
+	digitalWrite(pin, val);
+	notify(id - '0', "out", val);
 }
  
 
@@ -167,9 +172,8 @@ void setup()
 { 
 	Serial.begin(115200);
 
-	// no pullups
 	for(unsigned i = 0 ; i < input_pin_count ; i++)
-		pinMode(input_pins[i], INPUT);
+		pinMode(input_pins[i], INPUT_PULLUP);
 		
 	for(unsigned i = 0 ; i < output_pin_count ; i++)
 	{
@@ -198,16 +202,22 @@ void setup()
 
 /*
  * we've had a transition, notify the MQTT server
+ * This works for both input and output ports
  */
-void notify(unsigned id, unsigned state)
+void notify(unsigned id, const char * dir, unsigned state)
 {
 	char buf[32];
-	snprintf(buf, sizeof(buf), "/%s/in%d/state",
+	snprintf(buf, sizeof(buf), "/%s/%s%d/state",
 		device_id,
+		dir,
 		id
 	);
 
-	mqtt.publish(buf, state ? "ON" : "OFF");
+	const char * msg = state ? "1" : "0";
+	mqtt.publish(buf, msg);
+	Serial.print(buf);
+	Serial.print("=");
+	Serial.println(msg);
 }
 
  
@@ -242,7 +252,7 @@ void loop()
 		// we've had a change and it has lasted long enough
 		// to be real.  update the notifications
 		last_input[i] = val;
-		notify(i, val);
+		notify(i, "in", val);
 	}
 
 
