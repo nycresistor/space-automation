@@ -60,6 +60,7 @@ static const unsigned output_pin_count
 
 static unsigned long last_change[input_pin_count]; // time in ms
 static unsigned last_input[input_pin_count];
+static unsigned last_output[output_pin_count];
 
 
 int wifi_connect()
@@ -121,6 +122,12 @@ mqtt_connect()
 		);
 		mqtt.subscribe(buf);
 	}
+
+	// and send all of our states
+	for(unsigned i = 0 ; i < output_pin_count ; i++)
+		notify(i, "out", last_output[i]);
+	for(unsigned i = 0 ; i < input_pin_count ; i++)
+		notify(i, "in", last_input[i]);
 }
 
 
@@ -164,6 +171,7 @@ mqtt_callback(
 	}
 
 	digitalWrite(pin, val);
+	last_output[pin] = val;
 	notify(id - '0', "out", val);
 }
  
@@ -173,12 +181,17 @@ void setup()
 	Serial.begin(115200);
 
 	for(unsigned i = 0 ; i < input_pin_count ; i++)
+	{
 		pinMode(input_pins[i], INPUT_PULLUP);
+		delay(10);
+		last_input[i] = digitalRead(input_pins[i]);
+	}
 		
 	for(unsigned i = 0 ; i < output_pin_count ; i++)
 	{
 		pinMode(output_pins[i], OUTPUT);
 		digitalWrite(output_pins[i], 0);
+		last_output[i] = 0;
 	}
 
 	uint8_t mac_bytes[6];
@@ -213,7 +226,7 @@ void notify(unsigned id, const char * dir, unsigned state)
 		id
 	);
 
-	const char * msg = state ? "1" : "0";
+	const char * msg = state ? "ON" : "OFF";
 	mqtt.publish(buf, msg);
 	Serial.print(buf);
 	Serial.print("=");
@@ -278,6 +291,14 @@ void loop()
 		{
 			Serial.print(" ");
 			Serial.print(last_input[i]);
+		}
+
+		Serial.print(" out");
+
+		for(unsigned i = 0 ; i < output_pin_count ; i++)
+		{
+			Serial.print(" ");
+			Serial.print(last_output[i]);
 		}
 
 		Serial.println();
