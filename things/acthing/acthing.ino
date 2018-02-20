@@ -11,8 +11,21 @@
  *
  * The device listens for MQTT commands or serial port commands to
  * send the OFF command.
+
+    3440 us               430       430    430
+   +------------+         +--+      +--+   +--+
+___|            |_________|  |______|  |___|  |___
+                 430+1320    1 = 1320  0=430
+
  */
 #include "config.h"
+
+#define MODULATION_WIDTH	  12 // usec == 35.7 kHz
+#define SYNC_WIDTH		3440
+#define HIGH_WIDTH		 430
+#define ZERO_WIDTH		 430
+#define ONE_WIDTH		1320
+
 
 #include <ESP8266WiFi.h>
 #include <WiFiClient.h>
@@ -90,12 +103,6 @@ unsigned long high_length()
 		return delta;
 	}
 }
-
-#define MODULATION_WIDTH	  12 // usec == 35.7 kHz
-#define SYNC_WIDTH		3440
-#define HIGH_WIDTH		 430
-#define ZERO_WIDTH		 430
-#define ONE_WIDTH		1320
 
 void send_high(unsigned long length)
 {
