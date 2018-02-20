@@ -40,22 +40,22 @@ A tab is called a `view`.  So in one of the group files make a group for what yo
 
 ```yaml
 lights:
-    view: yes
-    name: Ligts
-    entities:
-        - group: main_room_card
-        - group: back_room_card
+  view: yes
+  name: Ligts
+  entities:
+    - group: main_room_card
+    - group: back_room_card
 ```
 
 The main page of the Home Assistant app and webview is called the `default_view`.  If you want to customize it:
 
 ```yaml
 default_view:
-    view: yes
-    entities:
-        - group: lights_card
-        - group: motion_sensors
-        - media_player.spotify
+  view: yes
+  entities:
+    - group: lights_card
+    - group: motion_sensors
+    - media_player.spotify
 ```
 
 ### How do I make a card on a view?
@@ -64,10 +64,10 @@ In the `groups.yaml`, or in `groups/cards.yaml`
 
 ```yaml
 lights_card:
-    name: Lights
-    entities:
-        - group.main_room
-        - group.back_room
+  name: Lights
+  entities:
+    - group.main_room
+    - group.back_room
 ```
 
 And then reference that card group in the default_view group, or whatever group that represents the tab that you want it on.

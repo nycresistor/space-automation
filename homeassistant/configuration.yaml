@@ -112,19 +112,10 @@ tts:
 # Cloud
 cloud:
 
-#light tower1:
-#  platform: tradfri
-#light tower2:
-#  platform: tradfri
-#light tower3:
-#  platform: tradfri
-
-#light kitchen1:
-#  platform: hue
-#light kitchen2:
-#  platform: hue
-#light kitchen3:
-#  platform: hue
+#remote climate1:
+#  platform: mqtt
+#remote climate2:
+#  platform: mqtt
 
 #light:
 #  - platform: mqtt
