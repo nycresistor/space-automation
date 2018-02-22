@@ -15,17 +15,7 @@
  * TODO: Add PWM support for analog output.
  */
 
-#include "config.h"
-
-#include <ESP8266WiFi.h>
-#include <WiFiClient.h>
-
-WiFiClient wifi;
-
-// MQTT libraries for reporting status
-#include <PubSubClient.h>
-PubSubClient mqtt(wifi);
-static char device_id[16];
+#include "thing.h"
 
 #if 0
 // Neopixel hat
@@ -63,92 +53,34 @@ static unsigned last_input[input_pin_count];
 static unsigned last_output[output_pin_count];
 
 
-int wifi_connect()
+/*
+ * we've had a transition, notify the MQTT server
+ * This works for both input and output ports
+ */
+void notify(unsigned id, const char * dir, unsigned state)
 {
-	int connAttempts = 0;
-
-	Serial.println(String(device_id) + " connecting to " + String(WIFI_SSID));
-	WiFi.persistent(false);
-	WiFi.mode(WIFI_STA);
-	WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-	Serial.print(".");
-
-	while (WiFi.status() != WL_CONNECTED ) {
-		delay(500);
-		Serial.print(".");
-		if(connAttempts > 20)
-			return -5;
-		connAttempts++;
-	}
-
-	Serial.println("WiFi connected\r\n");
-	Serial.print("IP address: ");
-	Serial.println(WiFi.localIP());
-	return 1;
-}
-
-
-static void
-mqtt_connect()
-{
-	static long last_mqtt_connect;
-
-	if (mqtt.connected() || millis() - last_mqtt_connect < 5000)
-		return;
-
-	last_mqtt_connect = millis();
-
-	Serial.print("mqtt: Trying to connect ");
-	Serial.print(MQTT_SERVER);
-
-	mqtt.setServer(MQTT_SERVER, MQTT_PORT);
-
-	if (!mqtt.connect("gpiothing", MQTT_USER, MQTT_PASSWORD))
-	{
-		Serial.println(" fail");
-		return;
-	}
-
-	Serial.println(" success");
-
-	// subscribe to all of our output status bits
 	char buf[32];
+	snprintf(buf, sizeof(buf), "%s%d/state",
+		dir,
+		id
+	);
 
-	for(unsigned i = 0 ; i < output_pin_count ; i++)
-	{
-		snprintf(buf, sizeof(buf), "/%s/out%d/status",
-			device_id,
-			i
-		);
-		mqtt.subscribe(buf);
-	}
-
-	// and send all of our states
-	for(unsigned i = 0 ; i < output_pin_count ; i++)
-		notify(i, "out", last_output[i]);
-	for(unsigned i = 0 ; i < input_pin_count ; i++)
-		notify(i, "in", last_input[i]);
+	thing_publish(buf, state ? "ON" : "OFF");
 }
 
 
 static void
-mqtt_callback(
-	char * topic,
-	byte * payload,
-	unsigned int len
+gpio_callback(
+	const char * topic,
+	const uint8_t * payload,
+	size_t len
 )
 {
-	Serial.print("MQTT: ");
-	Serial.print(topic);
-	Serial.print("'");
-	Serial.write(payload, len);
-	Serial.println("'");
-
 	const char * msg = (const char *) payload;
 
 	// we trust that the topic looks right, so it
-	// should be of the form '/0123456789ab/outX/state'
-	const char id = topic[17]; // the digit after out
+	// should be of the form 'outX/state'
+	const char id = topic[3]; // the digit after out
 	if (id < '0' || id >= '0' + output_pin_count)
 	{
 		Serial.println("UNKNOWN TOPIC");
@@ -179,6 +111,7 @@ mqtt_callback(
 void setup()
 { 
 	Serial.begin(115200);
+	thing_setup();
 
 	for(unsigned i = 0 ; i < input_pin_count ; i++)
 	{
@@ -194,52 +127,21 @@ void setup()
 		last_output[i] = 0;
 	}
 
-	uint8_t mac_bytes[6];
-	WiFi.macAddress(mac_bytes);
-	snprintf(device_id, sizeof(device_id), "%02x%02x%02x%02x%02x%02x",
-		mac_bytes[0],
-		mac_bytes[1],
-		mac_bytes[2],
-		mac_bytes[3],
-		mac_bytes[4],
-		mac_bytes[5]
-	);
+	// subscribe to all of our output status bits
+	for(unsigned i = 0 ; i < output_pin_count ; i++)
+		thing_subscribe(gpio_callback, "out%d/status", i);
 
-	wifi_connect();
-	configTime(1, 3600, "pool.ntp.org");
-
-	mqtt.setCallback(mqtt_callback);
-	mqtt_connect();
+	// and send all of our states
+	for(unsigned i = 0 ; i < output_pin_count ; i++)
+		notify(i, "out", last_output[i]);
+	for(unsigned i = 0 ; i < input_pin_count ; i++)
+		notify(i, "in", last_input[i]);
 }
 
 
-/*
- * we've had a transition, notify the MQTT server
- * This works for both input and output ports
- */
-void notify(unsigned id, const char * dir, unsigned state)
-{
-	char buf[32];
-	snprintf(buf, sizeof(buf), "/%s/%s%d/state",
-		device_id,
-		dir,
-		id
-	);
-
-	const char * msg = state ? "ON" : "OFF";
-	mqtt.publish(buf, msg);
-	Serial.print(buf);
-	Serial.print("=");
-	Serial.println(msg);
-}
-
- 
 void loop()
 {
-	// if we've lost connection, reconnect to our mqtt server
-	mqtt.loop();
-	if(!mqtt.connected())
-		mqtt_connect();
+	thing_loop();
 
 	const unsigned long now = millis();
 

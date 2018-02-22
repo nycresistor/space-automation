@@ -18,7 +18,7 @@ ___|            |_________|  |______|  |___|  |___
                  430+1320    1 = 1320  0=430
 
  */
-#include "config.h"
+#include "thing.h"
 
 #define MODULATION_WIDTH	  12 // usec == 35.7 kHz
 #define SYNC_WIDTH		3440
@@ -26,16 +26,6 @@ ___|            |_________|  |______|  |___|  |___
 #define ZERO_WIDTH		 430
 #define ONE_WIDTH		1320
 
-
-#include <ESP8266WiFi.h>
-#include <WiFiClient.h>
-
-WiFiClient wifi;
-
-// MQTT libraries for reporting status
-#include <PubSubClient.h>
-PubSubClient mqtt(wifi);
-static char device_id[16];
 
 // DHT sensor library for temp and humidity
 #include <DHTesp.h>
@@ -74,15 +64,6 @@ static const char cool_cmd[] =
 "00000001" "11101111" "00000000" "00000000"
 "00000000" "00000000" "00000000" "00000000"
 "00000000" "01011000" "1";
-
-void setup()
-{
-	dht.setup(DHT_PIN);
-	pinMode(IR_INPUT_PIN, INPUT);
-	Serial.begin(115200);
-	thing_setup();
-}
-
 
 unsigned long high_length()
 {
@@ -170,124 +151,96 @@ void send_ir(const char * cmd)
 }
 
 
+#define RED_LED_PIN 0 // gpio 0 is the red LED on the Huzzah board
+#define BLUE_LED_PIN 2 // gpio 2 is the blue LED on the Huzzah board
 
-int
-wifi_connect()
+void red_led(int state)
 {
-	int connAttempts = 0;
-
-	Serial.println(String(device_id) + " connecting to " + String(WIFI_SSID));
-	WiFi.persistent(false);
-	WiFi.mode(WIFI_STA);
-	WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
-	Serial.print(".");
-
-	while (WiFi.status() != WL_CONNECTED ) {
-		delay(500);
-		Serial.print(".");
-		if(connAttempts > 20)
-			return -5;
-		connAttempts++;
+	if (state)
+	{
+		pinMode(RED_LED_PIN, OUTPUT);
+		digitalWrite(RED_LED_PIN, 0);
+	} else {
+		pinMode(RED_LED_PIN, INPUT);
 	}
+}
 
-	Serial.println("WiFi connected\r\n");
-	Serial.print("IP address: ");
-	Serial.println(WiFi.localIP());
-	return 1;
+void blue_led(int state)
+{
+	if (state)
+	{
+		pinMode(BLUE_LED_PIN, OUTPUT);
+		digitalWrite(BLUE_LED_PIN, 0);
+	} else {
+		pinMode(BLUE_LED_PIN, INPUT);
+	}
+}
+
+void ac_heat()
+{
+	send_ir(heat_cmd);
+	delay(10);
+	send_ir(heat_cmd);
+
+	thing_publish("aricon/state", "HEAT");
+
+	// turn on the RED led
+	red_led(1);
+	blue_led(0);
+}
+
+
+void ac_off()
+{
+	send_ir(off_cmd);
+	delay(100);
+	send_ir(off_cmd);
+	thing_publish("aircon/state", "OFF");
+
+	red_led(0);
+	blue_led(0);
+}
+
+
+void ac_cool()
+{
+	send_ir(cool_cmd);
+	delay(100);
+	send_ir(cool_cmd);
+	thing_publish("aircon/state", "COOL");
+
+	red_led(0);
+	blue_led(1);
 }
 
 
 void
-mqtt_connect()
-{
-	static long last_mqtt_connect;
-
-	if (mqtt.connected() || millis() - last_mqtt_connect < 5000)
-		return;
-
-	last_mqtt_connect = millis();
-
-	Serial.print("mqtt: Trying to connect ");
-	Serial.print(MQTT_SERVER);
-
-	mqtt.setServer(MQTT_SERVER, MQTT_PORT);
-
-	if (!mqtt.connect("gpiothing", MQTT_USER, MQTT_PASSWORD))
-	{
-		Serial.println(" fail");
-		return;
-	}
-
-	Serial.println(" success");
-
-	// subscribe to all of our output status bits
-	char buf[32];
-	snprintf(buf, sizeof(buf), "/%s/ac/status", device_id);
-	mqtt.subscribe(buf);
-	Serial.println(buf);
-}
-
-
-static void
-mqtt_callback(
-	char * topic,
-	byte * payload,
-	unsigned int len
+ac_callback(
+	const char * topic,
+	const uint8_t * payload,
+	size_t len
 )
 {
-	Serial.print("MQTT: ");
-	Serial.print(topic);
-	Serial.print("'");
-	Serial.write(payload, len);
-	Serial.println("'");
-
 	const char * msg = (const char *) payload;
 
+	if (strncmp(msg, "OFF", len) == 0)
+	{
+		ac_off();
+	} else
 	if (strncmp(msg, "HEAT", len) == 0)
 	{
-		send_ir(heat_cmd);
-		delay(100);
-		send_ir(heat_cmd);
+		ac_heat();
 	} else
 	if (strncmp(msg, "COOL", len) == 0)
 	{
-		send_ir(cool_cmd);
-		delay(100);
-		send_ir(cool_cmd);
-	} else
-	if (strncmp(msg, "OFF", len) == 0)
-	{
-		send_ir(off_cmd);
-		delay(100);
-		send_ir(off_cmd);
+		ac_cool();
 	} else {
-		Serial.println("UNKNOWN COMMAND");
+		Serial.print(msg);
+		Serial.println(" UNKNOWN COMMAND");
 		return;
 	}
 }
  
-
-void thing_setup()
-{ 
-	uint8_t mac_bytes[6];
-	WiFi.macAddress(mac_bytes);
-	snprintf(device_id, sizeof(device_id), "%02x%02x%02x%02x%02x%02x",
-		mac_bytes[0],
-		mac_bytes[1],
-		mac_bytes[2],
-		mac_bytes[3],
-		mac_bytes[4],
-		mac_bytes[5]
-	);
-
-	wifi_connect();
-	configTime(1, 3600, "pool.ntp.org");
-
-	mqtt.setCallback(mqtt_callback);
-	mqtt_connect();
-}
-
-
 
 void read_ir()
 {
@@ -330,13 +283,14 @@ void read_ir()
 	Serial.println();
 }
 
+
 void send_temp(TempAndHumidity th)
 {
-	Serial.print(th.temperature, 1);
-	Serial.print(" degC ");
-	Serial.print(th.humidity, 1);
-	Serial.print("% ");
-	Serial.println(dht.getStatusString());
+	if (dht.getStatus() == DHTesp::ERROR_NONE)
+		thing_publish("sensor/state", "%.2f,%.2f",
+			th.temperature, th.humidity);
+	else
+		thing_publish("sensor/state", "%s", dht.getStatusString());
 }
 
 
@@ -344,27 +298,9 @@ void serial_console()
 {
 	const char c = Serial.read();
 
-	if (c == 'x')
-	{
-		Serial.println("OFF");
-		send_ir(off_cmd);
-		delay(10);
-		send_ir(off_cmd);
-	}
-	if (c == 'h')
-	{
-		Serial.println("HEAT");
-		send_ir(heat_cmd);
-		delay(10);
-		send_ir(heat_cmd);
-	}
-	if (c == 'c')
-	{
-		Serial.println("COOL");
-		send_ir(cool_cmd);
-		delay(10);
-		send_ir(cool_cmd);
-	}
+	if (c == 'x') ac_off();
+	if (c == 'h') ac_heat();
+	if (c == 'c') ac_cool();
 
 	if (c == 't')
 	{
@@ -374,13 +310,21 @@ void serial_console()
 }
 
 
+void setup()
+{
+	dht.setup(DHT_PIN);
+	pinMode(IR_INPUT_PIN, INPUT);
+	Serial.begin(115200);
+
+	thing_setup();
+	thing_subscribe(ac_callback, "aircon/status");
+	ac_off();
+}
+
 
 void loop()
 {
-	// wait for a sync pulse or a command from the serial port
-	mqtt.loop();
-	if(!mqtt.connected())
-		mqtt_connect();
+	thing_loop();
 
 	if (Serial.available())
 		serial_console();
@@ -397,10 +341,8 @@ void loop()
 	{
 		last_measurement = now;
 		TempAndHumidity th = dht.getTempAndHumidity();
-		send_temp(th);
 
-		if (now - last_report > report_interval
-		&& dht.getStatus() == DHTesp::ERROR_NONE)
+		if (now - last_report > report_interval)
 		{
 			last_report = now;
 			Serial.print("MQTT: ");
@@ -409,4 +351,3 @@ void loop()
 	}
 			
 }
-		
