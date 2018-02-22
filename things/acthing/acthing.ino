@@ -36,6 +36,20 @@ WiFiClient wifi;
 #include <PubSubClient.h>
 PubSubClient mqtt(wifi);
 static char device_id[16];
+
+// DHT sensor library for temp and humidity
+#include <DHTesp.h>
+#define DHT_PIN 12
+DHTesp dht;
+unsigned long last_measurement;
+unsigned long last_report;
+unsigned long report_interval = 300000; // 5 minutes
+unsigned long measurement_interval = 2000; // 2 seconds
+
+
+// IR remote control
+// TODO: fix the encoding to not have an off-by-one error
+// TODO: test with the LED from 5v to ground
 #define IR_INPUT_PIN 14
 
 static const char off_cmd[] =
@@ -63,6 +77,7 @@ static const char cool_cmd[] =
 
 void setup()
 {
+	dht.setup(DHT_PIN);
 	pinMode(IR_INPUT_PIN, INPUT);
 	Serial.begin(115200);
 	thing_setup();
@@ -273,35 +288,9 @@ void thing_setup()
 }
 
 
-void loop()
+
+void read_ir()
 {
-	// wait for a sync pulse or a command from the serial port
-	while(1)
-	{
-		mqtt.loop();
-		if(!mqtt.connected())
-			mqtt_connect();
-
-		if (Serial.available())
-		{
-			if (Serial.read() == '\n')
-			{
-				send_ir(off_cmd);
-				delay(10);
-				send_ir(off_cmd);
-			}
-		}
-
-		if(digitalRead(IR_INPUT_PIN) != 0)
-		{
-			unsigned long length = high_length();
-			if (length > 3000)
-				break;
-			Serial.print("-");
-			Serial.println(length);
-		}
-	}
-
 	unsigned long start = micros();
 
 	Serial.println("------");
@@ -341,3 +330,83 @@ void loop()
 	Serial.println();
 }
 
+void send_temp(TempAndHumidity th)
+{
+	Serial.print(th.temperature, 1);
+	Serial.print(" degC ");
+	Serial.print(th.humidity, 1);
+	Serial.print("% ");
+	Serial.println(dht.getStatusString());
+}
+
+
+void serial_console()
+{
+	const char c = Serial.read();
+
+	if (c == 'x')
+	{
+		Serial.println("OFF");
+		send_ir(off_cmd);
+		delay(10);
+		send_ir(off_cmd);
+	}
+	if (c == 'h')
+	{
+		Serial.println("HEAT");
+		send_ir(heat_cmd);
+		delay(10);
+		send_ir(heat_cmd);
+	}
+	if (c == 'c')
+	{
+		Serial.println("COOL");
+		send_ir(cool_cmd);
+		delay(10);
+		send_ir(cool_cmd);
+	}
+
+	if (c == 't')
+	{
+		TempAndHumidity th = dht.getTempAndHumidity();
+		send_temp(th);
+	}
+}
+
+
+
+void loop()
+{
+	// wait for a sync pulse or a command from the serial port
+	mqtt.loop();
+	if(!mqtt.connected())
+		mqtt_connect();
+
+	if (Serial.available())
+		serial_console();
+
+	if(digitalRead(IR_INPUT_PIN) != 0)
+	{
+		unsigned long length = high_length();
+		if (length > 3000)
+			read_ir();
+	}
+
+	const unsigned long now = millis();
+	if (now - last_measurement > measurement_interval)
+	{
+		last_measurement = now;
+		TempAndHumidity th = dht.getTempAndHumidity();
+		send_temp(th);
+
+		if (now - last_report > report_interval
+		&& dht.getStatus() == DHTesp::ERROR_NONE)
+		{
+			last_report = now;
+			Serial.print("MQTT: ");
+			send_temp(th);
+		}
+	}
+			
+}
+		
