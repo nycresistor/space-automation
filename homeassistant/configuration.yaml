@@ -78,6 +78,12 @@ conversation:
 # Enables support for tracking state changes over time
 history:
 
+history_graph:
+  climate_graph:
+    entities:
+      -sensor.temperature
+      -sensor.humidity
+
 # View all events in a logbook
 logbook:
 
@@ -101,9 +107,19 @@ sun:
 #    client_id: !secret spotify_id
 #    client_secret: !secret spotify_secret
 
-# Weather prediction
-sensor:
+# Weather prediction from yr.no which is the Norwegian Meterological Inst.
+sensor yr:
   - platform: yr
+
+sensor temperature:
+  - platform: mqtt
+  - name: Temperature
+    state_topic: "/18fe34d44eb8/sensor/temperature"
+
+sensor humidity:
+  - platform: mqtt
+  - name: Humidity
+    state_topic: "/18fe34d44eb8/sensor/humidity"
 
 # Text to speech
 tts:

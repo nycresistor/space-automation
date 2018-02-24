@@ -5,6 +5,7 @@ default_view:
   view: yes
   entities:
     - group.themes_card
+    - group.status_card
 
 ## The cards
 
@@ -12,6 +13,11 @@ themes_card:
   name: Themes
   entities:
   - input_select.frontend_theme
+
+status_card:
+  name: Space Status
+  entities:
+  - climate_graph
 
 # example:
 #

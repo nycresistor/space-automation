@@ -29,6 +29,20 @@ ___|            |_________|  |______|  |___|  |___
  *  |   |   |   |
  * Vcc Data NC Gnd
  *
+
+	Configuration (HA):
+	sensor temperature:
+	  platform: mqtt
+	  state_topic: '/18fe34d44eb8/sensor/temperature'
+	  name: 'Temperature'
+	  unit_of_measurent: 'ºC'
+
+	sensor humidity:
+	  platform: mqtt
+	  state_topic: '/18fe34d44eb8/sensor/humidity'
+	  name: 'Humidity'
+	  unit_of_measurent: '%'
+
  */
 #include "thing.h"
 
@@ -288,9 +302,10 @@ void read_ir()
 void send_temp(TempAndHumidity th)
 {
 	if (dht.getStatus() == DHTesp::ERROR_NONE)
-		thing_publish("sensor/state", "%.2f,%.2f",
-			th.temperature, th.humidity);
-	else
+	{
+		thing_publish("sensor/temperature", "%.2f", th.temperature);
+		thing_publish("sensor/humidity", "%.2f", th.humidity);
+	} else
 		thing_publish("sensor/state", "%s", dht.getStatusString());
 }
 
