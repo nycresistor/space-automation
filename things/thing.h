@@ -130,11 +130,17 @@ mqtt_callback(
 
 	for(int i = 0 ; i < topic_count ; i++)
 	{
-		if (strcmp(topic, topic_names[topic_count]) != 0)
+		if (strcmp(topic, topic_names[i]) != 0)
 			continue;
 
-		topic_callbacks[topic_count](topic + 14, payload, len);
+		topic_callbacks[i](topic + 14, payload, len);
 		return;
+	}
+
+	Serial.println("NO MATCH?");
+	for(int i = 0 ; i < topic_count ; i++)
+	{
+		Serial.println(topic_names[i]);
 	}
 }
 
