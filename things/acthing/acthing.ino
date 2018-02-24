@@ -3,46 +3,10 @@
  *
  * The IR is 36 KHz, which is non-standard compared to the normal 38 KHz.
  *
- * Start pulse is modulated high for 3.5 ms
- * 1 bits are 1720us low, then modulated high for 430us
- * 0 bits are  860us low, then modulated high for 430us
+ * Start pulse 3440us high, 1720us low
+ * 1 bits are   430us high, 1320us low
+ * 0 bits are   430us high,  860us low
  *
- * Each time the button is pressed it sends the command twice.
- *
- * The device listens for MQTT commands or serial port commands to
- * send the OFF command.
-
-    3440 us               430       430    430
-   +------------+         +--+      +--+   +--+
-___|            |_________|  |______|  |___|  |___
-                 430+1320    1 = 1320  0=430
- *
- * The DHT22 pinout is
- *   ___________
- *  /           \
- * /______O______\
- * |             |
- * |             |
- * |             |
- * |   AM2302    |
- * +-------------+
- *  |   |   |   |
- * Vcc Data NC Gnd
- *
-
-	Configuration (HA):
-	sensor temperature:
-	  platform: mqtt
-	  state_topic: '/18fe34d44eb8/sensor/temperature'
-	  name: 'Temperature'
-	  unit_of_measurent: 'ºC'
-
-	sensor humidity:
-	  platform: mqtt
-	  state_topic: '/18fe34d44eb8/sensor/humidity'
-	  name: 'Humidity'
-	  unit_of_measurent: '%'
-
  */
 #include "thing.h"
 
@@ -65,33 +29,14 @@ unsigned long measurement_interval = 2000; // 2 seconds
 
 
 // IR remote control
-// TODO: fix the encoding to not have an off-by-one error
-// TODO: test with the LED from 5v to ground
 #define IR_INPUT_PIN 13
 #define IR_OUTPUT_PIN 14
 
-static const char off_cmd[] =
-"1100010011010011011001001000000"
-"00000000000000000000100001011000"
-"00000001111011110000000000000000"
-"00000000000000000000000000000000"
-"00000000010100110";
-
+static const char off_cmd[]	= "C4D36480000010B003DE00000000000000A6";
 // this is the on command for 85F, swing h+v, 3 fan
-static const char heat_cmd[] = 
-"1100010" "01101001" "10110010" "01000000"
-"00000000" "00000010" "00001000" "01011000"
-"00000001" "11101111" "00000000" "00000000"
-"00000000" "00000000" "00000000" "00000000"
-"00000000" "01010000" "1";
-
+static const char heat_cmd[]	= "C4D36480000410B003DE00000000000000A1";
 // this is the on command for 70F, swing h+v, 3 fan
-static const char cool_cmd[] =
-"1100010" "01101001" "10110010" "01000000"
-"00000000" "00000010" "00001000" "01010100"
-"00000001" "11101111" "00000000" "00000000"
-"00000000" "00000000" "00000000" "00000000"
-"00000000" "01011000" "1";
+static const char cool_cmd[]	= "C4D36480000410A803DE00000000000000B1";
 
 unsigned long high_length()
 {
@@ -171,19 +116,34 @@ void send_ir(const char * cmd)
 	pinMode(IR_INPUT_PIN, OUTPUT);
 	send_high(SYNC_WIDTH);
 	delayMicroseconds(SYNC_LOW_WIDTH);
+	send_high(HIGH_WIDTH);
+
 
 	while(1)
 	{
-		send_high(HIGH_WIDTH);
-
-		char bit = *cmd++;
-		if(bit == '\0')
+		char nib = *cmd++;
+		if(nib == '\0')
 			break;
-
-		if (bit == '1')
-			delayMicroseconds(ONE_WIDTH);
+		if ('0' <= nib && nib <= '9')
+			nib = nib - '0';
 		else
-			delayMicroseconds(ZERO_WIDTH);
+		if ('a' <= nib && nib <= 'f')
+			nib = nib - 'a' + 0xA;
+		else
+		if ('A' <= nib && nib <= 'F')
+			nib = nib - 'A' + 0xA;
+
+		for(int i = 0 ; i < 4 ; i++, nib <<= 1)
+		{
+			const int bit = nib & 0x08;
+
+			if (bit)
+				delayMicroseconds(ONE_WIDTH);
+			else
+				delayMicroseconds(ZERO_WIDTH);
+
+			send_high(HIGH_WIDTH);
+		}
 
 	}
 
