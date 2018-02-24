@@ -50,7 +50,7 @@ typedef void (*thing_callback_t)(const char * topic, const uint8_t * msg, size_t
 #define MAX_TOPICS 16
 
 static int topic_count;
-static char topics[MAX_TOPICS][32];
+static char topic_names[MAX_TOPICS][32];
 static thing_callback_t topic_callbacks[MAX_TOPICS];
 
 void
@@ -76,7 +76,7 @@ mqtt_connect()
 
 	Serial.println(" success");
 	for(int i = 0 ; i < topic_count ; i++)
-		mqtt.subscribe(topics[i]);
+		mqtt.subscribe(topic_names[i]);
 }
 
 
@@ -91,7 +91,7 @@ thing_subscribe(
 	if (topic_count == MAX_TOPICS)
 		return;
 
-	char * buf = topics[topic_count];
+	char * buf = topic_names[topic_count];
 	topic_callbacks[topic_count] = callback;
 
 	// leading part is /0123456789ab/ with device mac address
@@ -130,7 +130,7 @@ mqtt_callback(
 
 	for(int i = 0 ; i < topic_count ; i++)
 	{
-		if (strcmp(topic, topics[topic_count]) != 0)
+		if (strcmp(topic, topic_names[topic_count]) != 0)
 			continue;
 
 		topic_callbacks[topic_count](topic + 14, payload, len);
