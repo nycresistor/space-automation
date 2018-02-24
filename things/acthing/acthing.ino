@@ -16,12 +16,25 @@
    +------------+         +--+      +--+   +--+
 ___|            |_________|  |______|  |___|  |___
                  430+1320    1 = 1320  0=430
-
+ *
+ * The DHT22 pinout is
+ *   ___________
+ *  /           \
+ * /______O______\
+ * |             |
+ * |             |
+ * |             |
+ * |   AM2302    |
+ * +-------------+
+ *  |   |   |   |
+ * Vcc Data NC Gnd
+ *
  */
 #include "thing.h"
 
 #define MODULATION_WIDTH	  12 // usec == 35.7 kHz
 #define SYNC_WIDTH		3440
+#define SYNC_LOW_WIDTH		1760
 #define HIGH_WIDTH		 430
 #define ZERO_WIDTH		 430
 #define ONE_WIDTH		1320
@@ -40,18 +53,19 @@ unsigned long measurement_interval = 2000; // 2 seconds
 // IR remote control
 // TODO: fix the encoding to not have an off-by-one error
 // TODO: test with the LED from 5v to ground
-#define IR_INPUT_PIN 14
+#define IR_INPUT_PIN 13
+#define IR_OUTPUT_PIN 14
 
 static const char off_cmd[] =
-"11100010" "01101001" "10110010" "01000000"
-"00000000" "00000000" "00001000" "01011000"
-"00000001" "11101111" "00000000" "00000000"
-"00000000" "00000000" "00000000" "00000000"
-"00000000" "01010011" "0";
+"1100010011010011011001001000000"
+"00000000000000000000100001011000"
+"00000001111011110000000000000000"
+"00000000000000000000000000000000"
+"00000000010100110";
 
 // this is the on command for 85F, swing h+v, 3 fan
 static const char heat_cmd[] = 
-"11100010" "01101001" "10110010" "01000000"
+"1100010" "01101001" "10110010" "01000000"
 "00000000" "00000010" "00001000" "01011000"
 "00000001" "11101111" "00000000" "00000000"
 "00000000" "00000000" "00000000" "00000000"
@@ -59,7 +73,7 @@ static const char heat_cmd[] =
 
 // this is the on command for 70F, swing h+v, 3 fan
 static const char cool_cmd[] =
-"11100010" "01101001" "10110010" "01000000"
+"1100010" "01101001" "10110010" "01000000"
 "00000000" "00000010" "00001000" "01010100"
 "00000001" "11101111" "00000000" "00000000"
 "00000000" "00000000" "00000000" "00000000"
@@ -100,13 +114,20 @@ unsigned long high_length()
 	}
 }
 
+
+void ir_led(int state)
+{
+	pinMode(IR_OUTPUT_PIN, state ? OUTPUT : INPUT);
+}
+
 void send_high(unsigned long length)
 {
 	const unsigned long start = micros();
 	unsigned long last_toggle = start;
 	int state = 1;
 
-	digitalWrite(IR_INPUT_PIN, state);
+	// Drive the output pin low, turning on the LED
+	ir_led(state);
 
 	while(1)
 	{
@@ -115,15 +136,19 @@ void send_high(unsigned long length)
 		if (now - start > length)
 			break;
 
-		if (now - last_toggle > MODULATION_WIDTH)
-		{
-			state = !state;
-			last_toggle = now;
-			digitalWrite(IR_INPUT_PIN, state);
-		}
+		if (now - last_toggle < MODULATION_WIDTH)
+			continue;
+
+		state = !state;
+		last_toggle = now;
+
+		// toggle the LED by driving the pin low (to turn it on)
+		// or letting it float (to turn it off)
+		ir_led(state);
 	}
 
-	digitalWrite(IR_INPUT_PIN, 0);
+	// let the pin float, turning off the LED
+	ir_led(0);
 }
 
 void send_ir(const char * cmd)
@@ -131,10 +156,12 @@ void send_ir(const char * cmd)
 	// send the sync pulse
 	pinMode(IR_INPUT_PIN, OUTPUT);
 	send_high(SYNC_WIDTH);
-	delayMicroseconds(ZERO_WIDTH);
+	delayMicroseconds(SYNC_LOW_WIDTH);
 
 	while(1)
 	{
+		send_high(HIGH_WIDTH);
+
 		char bit = *cmd++;
 		if(bit == '\0')
 			break;
@@ -144,7 +171,6 @@ void send_ir(const char * cmd)
 		else
 			delayMicroseconds(ZERO_WIDTH);
 
-		send_high(HIGH_WIDTH);
 	}
 
 	pinMode(IR_INPUT_PIN, INPUT);
@@ -289,6 +315,11 @@ void setup()
 {
 	dht.setup(DHT_PIN);
 	pinMode(IR_INPUT_PIN, INPUT);
+
+	// turn the LED off by 
+	digitalWrite(IR_OUTPUT_PIN, 0);
+	ir_led(0);
+	
 	Serial.begin(115200);
 
 	thing_setup();
@@ -324,5 +355,4 @@ void loop()
 			send_temp(th);
 		}
 	}
-			
 }
