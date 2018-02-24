@@ -4,10 +4,13 @@
  * For the Adafruit Huzzah ESP8266 board.  Since S-link is a 5 V
  * protocol with pullups and the board is not 5V tolerant the
  * signal is fed into pin 12 through a resistor.
+ *
+ * Best list of commands: http://boehmel.de/slink.htm
  */
 #include "thing.h"
 
 #define SLINK_PIN 12
+static const int debug = 0;
 
 void setup()
 { 
@@ -22,6 +25,11 @@ void setup()
 
 void slink_read(void)
 {
+	static unsigned bits = 0;
+	static unsigned data = 0;
+	static unsigned fail = 0;
+	unsigned bit = 0;
+
 	if (digitalRead(SLINK_PIN) != 0)
 		return;
 
@@ -36,20 +44,48 @@ void slink_read(void)
 	unsigned long delta = micros() - start;
 	red_led(0);
 
-	//Serial.println(delta);
 	if (delta > 2000)
-		Serial.println("----");
-	else
+	{
+		if (fail != 0)
+			Serial.print(" FAIL!");
+		if (bits != 0)
+			Serial.print(" partial?");
+		data = fail = bits = 0;
+		Serial.println("---");
+		return;
+	} else
 	if (1100 < delta && delta < 1300)
-		Serial.print("1");
-	else
+	{
+		bit = 1;
+	} else
 	if (500 < delta && delta < 700)
-		Serial.print("0");
-	else {
-		Serial.println();
+	{
+		bit = 0;
+	} else {
+		fail = 1;
+		bit = 0;
+	}
+
+	if (debug)
+	{
+		Serial.print(bit);
+		Serial.print(" ");
 		Serial.println(delta);
 	}
-		
+
+	data = (data << 1) | bit;
+	if (++bits == 8)
+	{
+		static const char hexdigit[] = "0123456789abcdef";
+		Serial.print(hexdigit[(data >> 4) & 0xF]);
+		Serial.print(hexdigit[(data >> 0) & 0xF]);
+
+		if (fail)
+			Serial.print("?");
+
+		fail = data = bits = 0;
+	}
+
 }
 
 
