@@ -10,20 +10,129 @@
 #include "thing.h"
 
 #define SLINK_PIN 12
+#define DEVID 0x70
+
 static const int debug = 0;
+static const uint8_t mute_on_cmd[]	= { DEVID, 0x06 };
+static const uint8_t mute_off_cmd[]	= { DEVID, 0x07 };
+static const uint8_t power_on_cmd[]	= { DEVID, 0x2E };
+static const uint8_t power_off_cmd[]	= { DEVID, 0x2F };
+static const uint8_t volume_up_cmd[]	= { DEVID, 0x14 };
+static const uint8_t volume_down_cmd[]	= { DEVID, 0x15 };
+
+
+void mute_command(
+	const char * topic,
+	const uint8_t * msg,
+	size_t len
+)
+{
+	if (memcmp(msg, "ON", len) == 0)
+	{
+		slink_send(mute_on_cmd, sizeof(mute_on_cmd));
+		thing_publish("state/mute", "ON");
+	} else
+	if (memcmp(msg, "OFF", len) == 0)
+	{
+		slink_send(mute_off_cmd, sizeof(mute_off_cmd));
+		thing_publish("state/mute", "OFF");
+	} else {
+		Serial.println("???");
+		// ?
+	}
+}
+
+void power_command(
+	const char * topic,
+	const uint8_t * msg,
+	size_t len
+)
+{
+	if (memcmp(msg, "ON", len) == 0)
+	{
+		slink_send(power_off_cmd, sizeof(power_off_cmd));
+		thing_publish("state/power", "ON");
+	} else
+	if (memcmp(msg, "ON", len) == 0)
+	{
+		slink_send(power_on_cmd, sizeof(power_on_cmd));
+		thing_publish("state/power", "ON");
+	} else {
+		// ?
+	}
+}
+
+void volume_command(
+	const char * topic,
+	const uint8_t * msg,
+	size_t len
+)
+{
+	if (memcmp(msg, "UP", len) == 0)
+	{
+		slink_send(volume_up_cmd, sizeof(volume_up_cmd));
+	} else
+	if (memcmp(msg, "DOWN", len) == 0)
+	{
+		slink_send(volume_down_cmd, sizeof(volume_down_cmd));
+	} else {
+		// ?
+	}
+}
+
+
+void source_command(
+	const char * topic,
+	const uint8_t * msg,
+	size_t len
+)
+{
+	uint8_t cmd[] = { DEVID, 0x50, 0x00 };
+
+	if (memcmp(msg, "Video1", len) == 0)
+	{
+		cmd[2] = 0x10;
+	} else
+	if (memcmp(msg, "Video2", len) == 0)
+	{
+		cmd[2] = 0x11;
+	} else
+	if (memcmp(msg, "Video3", len) == 0)
+	{
+		cmd[2] = 0x12;
+	} else
+	if (memcmp(msg, "DVD", len) == 0)
+	{
+		cmd[2] = 0x19;
+	} else
+	if (memcmp(msg, "TV", len) == 0)
+	{
+		cmd[2] = 0x17;
+	} else {
+		return;
+	}
+
+	slink_send(cmd, sizeof(cmd));
+	thing_publish("state/source", "%s", msg);
+}
 
 void setup()
 { 
-	Serial.begin(115200);
-
 	// we should probably use an external pullup to detect
 	// a disconnected bus, although the Sony devices will
 	// include their own
 	pinMode(SLINK_PIN, INPUT_PULLUP);
+
+	Serial.begin(115200);
+	thing_setup();
+	thing_subscribe(mute_command, "mute");
+	thing_subscribe(source_command, "source");
+	thing_subscribe(volume_command, "volume");
+	thing_subscribe(power_command, "power");
 }
 
 
-void slink_read(void)
+void slink_loop(void)
 {
 	static unsigned bits = 0;
 	static unsigned data = 0;
@@ -51,7 +160,7 @@ void slink_read(void)
 		if (bits != 0)
 			Serial.print(" partial?");
 		data = fail = bits = 0;
-		Serial.println("---");
+		Serial.println();
 		return;
 	} else
 	if (1100 < delta && delta < 1300)
@@ -88,6 +197,18 @@ void slink_read(void)
 
 }
 
+void slink_pulse(unsigned int width)
+{
+	// pull it low for the user pulse
+	digitalWrite(SLINK_PIN, 0);
+	pinMode(SLINK_PIN, OUTPUT);
+	delayMicroseconds(width);
+
+	// let it rise for 600 usec
+	pinMode(SLINK_PIN, INPUT_PULLUP);
+	delayMicroseconds(600);
+}
+
 
 // busywait during the send for now
 // Bytes are send MSB first
@@ -97,40 +218,28 @@ void slink_send_byte(uint8_t byte)
 {
 	for(unsigned i = 0 ; i < 8 ; i++, byte <<= 1)
 	{
-		digitalWrite(SLINK_PIN, 0);
 		if (byte & 0x80)
-			delayMicroseconds(1200);
+			slink_pulse(1200);
 		else
-			delayMicroseconds(600);
-
-		digitalWrite(SLINK_PIN, 1);
-		delayMicroseconds(600);
+			slink_pulse(600);
 	}
 }
 
-void slink_send(uint8_t bytes[], unsigned len)
+void slink_send(const uint8_t * bytes, unsigned len)
 {
-	pinMode(SLINK_PIN, OUTPUT);
+	blue_led(1);
 
 	// start bit is 2400 usec
-	digitalWrite(SLINK_PIN, 0);
-	delayMicroseconds(2400);
-	digitalWrite(SLINK_PIN, 1);
-	delayMicroseconds(600);
+	slink_pulse(2400);
 
 	for(unsigned i = 0 ; i < len ; i++)
 		slink_send_byte(bytes[i]);
 
-	// reset bus to high for at least several bits
-	digitalWrite(SLINK_PIN, 1);
-	delayMicroseconds(30000);
-
-	// and return to an input pin
-	pinMode(SLINK_PIN, INPUT);
+	blue_led(0);
 }
 
 
-void serial_read()
+void serial_loop()
 {
 	static unsigned len = 0;
 	static uint8_t buf[32];
@@ -141,6 +250,7 @@ void serial_read()
 
 	if(c == '\n')
 	{
+		Serial.print(" : ");
 		Serial.print(len/2);
 		Serial.println(" bytes");
 		slink_send(buf, len/2);
@@ -148,6 +258,8 @@ void serial_read()
 		return;
 	}
 
+	if (len == 0)
+		Serial.println("-> ");
 	Serial.print((char) c);
 
 	if ('0' <= c && c <= '9')
@@ -172,9 +284,7 @@ void serial_read()
  
 void loop()
 {
-	// check for input from the USB serial port
-	serial_read();
-
-	// check for IO on input pin
-	slink_read();
+	thing_loop();
+	serial_loop();
+	slink_loop();
 }
