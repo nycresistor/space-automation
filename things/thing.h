@@ -193,3 +193,31 @@ void thing_loop()
 	if(!mqtt.connected())
 		mqtt_connect();
 }
+
+
+// This is for the Adafruit Huzzah ESP8266 board
+#define RED_LED_PIN 0 // gpio 0 is the red LED on the Huzzah board
+#define BLUE_LED_PIN 2 // gpio 2 is the blue LED on the Huzzah board
+
+void red_led(int state)
+{
+	if (state)
+	{
+		pinMode(RED_LED_PIN, OUTPUT);
+		digitalWrite(RED_LED_PIN, 0);
+	} else {
+		pinMode(RED_LED_PIN, INPUT);
+	}
+}
+
+void blue_led(int state)
+{
+	if (state)
+	{
+		pinMode(BLUE_LED_PIN, OUTPUT);
+		digitalWrite(BLUE_LED_PIN, 0);
+	} else {
+		pinMode(BLUE_LED_PIN, INPUT);
+	}
+}
+
