@@ -18,6 +18,12 @@ static const unsigned long report_interval = 30000;
 DMXESPSerial dmx;
 #define SWITCH_PIN 5
 
+#define NUM_LIGHTS 8
+static int brightness = 0;
+static int last_switch = 0;
+static unsigned long last_update;
+#define FADE_RATE 30
+
 void dmx_callback(
 	const char * topic,
 	const uint8_t * payload,
@@ -55,10 +61,10 @@ void serial_console()
 
 	if (c == '+')
 	{
-		for(int i = 0 ; i < 8 ; i++)
+		for(int i = 0 ; i < NUM_LIGHTS ; i++)
 		{
 			//channels[i] = 1;
-			dmx.write(i, 0x5A);
+			dmx.write(i, 0xFF);
 		}
 		Serial.println("all on");
 		return;
@@ -68,7 +74,7 @@ void serial_console()
 
 void setup()
 {
-	dmx.init(8);
+	dmx.init(NUM_LIGHTS);
 	pinMode(SWITCH_PIN, INPUT_PULLUP);
 
 	Serial.begin(115200);
@@ -86,15 +92,36 @@ void loop()
 	if (Serial.available())
 		serial_console();
 
+	const unsigned long now = millis();
+
 	if(digitalRead(SWITCH_PIN) != 0)
 	{
-		// toggle the lights
+		// the switch is released; fade the lights
+		if (brightness != 0 && now - last_update > FADE_RATE)
+		{
+			brightness--;
+			last_update = now;
+			for(int i = 0 ; i < NUM_LIGHTS ; i++)
+				dmx.write(i, brightness);
+		}
+		last_switch = 0;
+	} else {
+		// the switch has been turned on.
+		// if we were all the way off, go full bright
+		// otherwise hold the brightness
+		if (brightness == 0 && last_switch == 0)
+		{
+			brightness = 0xFF;
+			for(int i = 0 ; i < NUM_LIGHTS ; i++)
+				dmx.write(i, brightness);
+		}
+
+		last_switch = 1;
 	}
 
 	dmx.update();
 
 	static unsigned long last_report;
-	const unsigned long now = millis();
 	if (now - last_report > report_interval)
 	{
 		last_report = now;
