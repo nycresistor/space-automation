@@ -80,9 +80,10 @@ history:
 
 history_graph:
   climate_graph:
+    name: "Climate"
     entities:
-      -sensor.temperature
-      -sensor.humidity
+      - sensor.temperature
+      - sensor.humidity
 
 # View all events in a logbook
 logbook:
