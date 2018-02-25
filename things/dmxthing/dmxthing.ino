@@ -12,7 +12,7 @@
  */
 #include "thing.h"
 
-static const unsigned long report_interval = 30000;
+static const unsigned long report_interval = 600000;
 
 #include "ESPDMX.h"
 DMXESPSerial dmx;
@@ -20,11 +20,8 @@ DMXESPSerial dmx;
 
 #define NUM_LIGHTS 8
 static int channels[NUM_LIGHTS];
-static int brightness = 0;
 static int last_switch = 0;
 static unsigned long last_update;
-static int do_fade;
-#define FADE_RATE 100
 
 void light(int id, int bright)
 {
@@ -38,8 +35,19 @@ void light(int id, int bright)
 	dmx.write(id, bright);
 
 	char topic[32];
-	snprintf(topic, sizeof(topic), "dmx%d/brightness", id);
+	snprintf(topic, sizeof(topic), "dmx%d/brightness_state", id);
 	thing_publish(topic, "%d", bright);
+
+	snprintf(topic, sizeof(topic), "dmx%d/state", id);
+	thing_publish(topic, "%s", bright == 0 ? "OFF" : "ON");
+}
+
+
+int brightness(int id)
+{
+	if (id < 1 || id > NUM_LIGHTS)
+		return -1;
+	return channels[id-1];
 }
 
 
@@ -50,7 +58,7 @@ void light_bright_callback(
 )
 {
 	const char * msg = (const char *) payload;
-	const unsigned id = topic[4] - '0';
+	const unsigned id = topic[3] - '0';
 
 	int bright = atoi((const char*) payload);
 
@@ -64,12 +72,15 @@ void light_status_callback(
 )
 {
 	const char * msg = (const char *) payload;
-	const unsigned id = topic[4] - '0';
+	const unsigned id = topic[3] - '0';
 	if (memcmp(payload, "OFF", len) == 0)
 		light(id, 0);
 	else
 	if (memcmp(payload, "ON", len) == 0)
-		light(id, 255);
+	{
+		if (brightness(id) == 0)
+			light(id, 255);
+	}
 
 }
  
@@ -82,7 +93,7 @@ void light_report()
 
 	last_report = now;
 	for(int i = 0 ; i < NUM_LIGHTS ; i++)
-		light(i+1, channels[i]);
+		light(i+1, brightness(i+1));
 }
 
 
@@ -93,7 +104,7 @@ void serial_console()
 	if ('1' <= c && c <= '9')
 	{
 		int chan = c - '0';
-		int bright = (channels[chan-1] == 0) ? 0xFF : 0x00;
+		int bright = (brightness(chan) == 0) ? 0xFF : 0x00;
 		light(chan, bright);
 		return;
 	}
@@ -118,18 +129,19 @@ void serial_console()
 
 void setup()
 {
-	thing_setup();
-
-	for(int i = 1 ; i <= NUM_LIGHTS ; i++)
-	{
-		thing_subscribe(light_status_callback, "dmx%d/status", i);
-		thing_subscribe(light_bright_callback, "dmx%d/brightness", i);
-	}
-
 	dmx.init(NUM_LIGHTS);
 	pinMode(SWITCH_PIN, INPUT_PULLUP);
 
 	Serial.begin(115200);
+
+	thing_setup();
+
+	for(int i = 1 ; i <= NUM_LIGHTS ; i++)
+	{
+		thing_subscribe(light_status_callback, "dmx%d/command", i);
+		thing_subscribe(light_bright_callback, "dmx%d/brightness", i);
+	}
+
 }
 
 
@@ -145,19 +157,10 @@ void loop()
 	if(digitalRead(SWITCH_PIN) != 0)
 	{
 		if (last_switch == 1)
-			do_fade = 1;
-
-		// the switch is released; fade the lights
-		if (do_fade && now - last_update > FADE_RATE)
 		{
-			last_update = now;
+			Serial.println("ALL OFF");
 			for(int i = 0 ; i < NUM_LIGHTS ; i++)
-			{
-				if (channels[i] == 0)
-					continue;
-
-				light(i+1, channels[i]-1);
-			}
+				light(i+1, 0);
 		}
 		last_switch = 0;
 	} else
@@ -166,11 +169,11 @@ void loop()
 		// the switch has been turned on.
 		// if we had been turned off before,
 		// go full bright
+		Serial.println("ALL ON");
 		for(int i = 0 ; i < NUM_LIGHTS ; i++)
 			light(i+1, 255);
 
 		last_switch = 1;
-		do_fade = 0;
 	}
 
 	dmx.update();
