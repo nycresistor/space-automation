@@ -218,3 +218,25 @@ light 18fe34d40b4d:
     platform: mqtt
     command_topic: "/18fe34d40b4d/out3/status"
     state_topic: "/18fe34d40b4d/out3/state"
+
+
+## The AC controllers are on MQTT ESP8266
+climate:
+  - platform: mqtt
+    name: Left AC
+    modes:
+      - "HEAT"
+      - "COOL"
+      - "OFF"
+    current_temperature_topic: /5ccf7f006806/aircon/temperature
+    mode_command_topic: /5ccf7f006806/aircon/status
+    mode_state_topic: /5ccf7f006806/aircon/state
+  - platform: mqtt
+    name: Right AC
+    modes:
+      - "HEAT"
+      - "COOL"
+      - "OFF"
+    current_temperature_topic: /5ccf7f0068df/aircon/temperature
+    mode_command_topic: /5ccf7f0068df/aircon/status
+    mode_state_topic: /5ccf7f0068df/aircon/state

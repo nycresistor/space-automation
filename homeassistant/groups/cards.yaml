@@ -8,6 +8,7 @@ default_view:
     - media_player.nyc_resistor
     - group.status_card
     - group.themes_card
+    - group.climate
 
 ## The cards
 

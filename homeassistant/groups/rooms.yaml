@@ -12,6 +12,12 @@ front_room:
     - light.dmx7
     - light.dmx8
 
+climate:
+  name: "Air conditioning"
+  entities:
+    - climate.left_ac
+    - climate.right_ac
+
 #examples:
 #
 #entry:
