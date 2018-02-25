@@ -79,7 +79,7 @@ conversation:
 history:
 
 history_graph:
-  climate_graph:
+  gr1:
     entities:
       -sensor.temperature
       -sensor.humidity
@@ -113,12 +113,12 @@ sensor yr:
 
 sensor temperature:
   - platform: mqtt
-  - name: Temperature
+    name: "Temperature"
     state_topic: "/18fe34d44eb8/sensor/temperature"
 
 sensor humidity:
   - platform: mqtt
-  - name: Humidity
+    name: "Humidity"
     state_topic: "/18fe34d44eb8/sensor/humidity"
 
 # Text to speech
