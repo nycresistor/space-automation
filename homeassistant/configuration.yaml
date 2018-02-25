@@ -28,21 +28,21 @@ ios:
 
 # Enable MQ Telemetry Transport protocol
 mqtt:
-  embedded: 
-    listeners:
-      default:
-        type: tcp
-        max-connections: 5000
-      internal_tcp_1:
-        bind: 127.0.0.1:1882
-      external_tcp_1:
-        bind: 0.0.0.0:1883
-      ws-1:
-        bind: 0.0.0.0:8081
-        type: ws
-  broker: 127.0.0.1
-  port: 1882
-  discovery: true
+#  embedded: 
+#    listeners:
+#      default:
+#        type: tcp
+#        max-connections: 5000
+#      internal_tcp_1:
+#        bind: 127.0.0.1:1882
+#      external_tcp_1:
+#        bind: 0.0.0.0:1883
+#      ws-1:
+#        bind: 0.0.0.0:8081
+#        type: ws
+#  broker: 127.0.0.1
+#  port: 1882
+#  discovery: true
 
 logger:
   default: warning
@@ -122,9 +122,52 @@ sensor:
 light:
   - platform: mqtt
     name: "dmx1"
-    command_topic: "/5ccf7f0e35b1/dmx1/status" 
-    brightness_state_topic: "/5ccf7f0e35b1/dmx1/state" 
+    command_topic: "/5ccf7f0e35b1/dmx1/command" 
+    state_topic: "/5ccf7f0e35b1/dmx1/state" 
     brightness_command_topic: "/5ccf7f0e35b1/dmx1/brightness" 
+    brightness_state_topic: "/5ccf7f0e35b1/dmx1/brightness_state" 
+  - platform: mqtt
+    name: "dmx2"
+    command_topic: "/5ccf7f0e35b1/dmx2/command" 
+    state_topic: "/5ccf7f0e35b1/dmx2/state" 
+    brightness_command_topic: "/5ccf7f0e35b1/dmx2/brightness" 
+    brightness_state_topic: "/5ccf7f0e35b1/dmx2/brightness_state" 
+  - platform: mqtt
+    name: "dmx3"
+    command_topic: "/5ccf7f0e35b1/dmx3/command" 
+    state_topic: "/5ccf7f0e35b1/dmx3/state" 
+    brightness_command_topic: "/5ccf7f0e35b1/dmx3/brightness" 
+    brightness_state_topic: "/5ccf7f0e35b1/dmx3/brightness_state" 
+  - platform: mqtt
+    name: "dmx4"
+    command_topic: "/5ccf7f0e35b1/dmx4/command" 
+    state_topic: "/5ccf7f0e35b1/dmx4/state" 
+    brightness_command_topic: "/5ccf7f0e35b1/dmx4/brightness" 
+    brightness_state_topic: "/5ccf7f0e35b1/dmx4/brightness_state" 
+  - platform: mqtt
+    name: "dmx5"
+    command_topic: "/5ccf7f0e35b1/dmx5/command" 
+    state_topic: "/5ccf7f0e35b1/dmx5/state" 
+    brightness_command_topic: "/5ccf7f0e35b1/dmx5/brightness" 
+    brightness_state_topic: "/5ccf7f0e35b1/dmx5/brightness_state" 
+  - platform: mqtt
+    name: "dmx6"
+    command_topic: "/5ccf7f0e35b1/dmx6/command" 
+    state_topic: "/5ccf7f0e35b1/dmx6/state" 
+    brightness_command_topic: "/5ccf7f0e35b1/dmx6/brightness" 
+    brightness_state_topic: "/5ccf7f0e35b1/dmx6/brightness_state" 
+  - platform: mqtt
+    name: "dmx7"
+    command_topic: "/5ccf7f0e35b1/dmx7/command" 
+    state_topic: "/5ccf7f0e35b1/dmx7/state" 
+    brightness_command_topic: "/5ccf7f0e35b1/dmx7/brightness" 
+    brightness_state_topic: "/5ccf7f0e35b1/dmx7/brightness_state" 
+  - platform: mqtt
+    name: "dmx8"
+    command_topic: "/5ccf7f0e35b1/dmx8/command" 
+    state_topic: "/5ccf7f0e35b1/dmx8/state" 
+    brightness_command_topic: "/5ccf7f0e35b1/dmx8/brightness" 
+    brightness_state_topic: "/5ccf7f0e35b1/dmx8/brightness_state" 
 
 # Text to speech
 tts:
