@@ -1,5 +1,10 @@
 # File for general groups of things by room or component type
 #
+front_room:
+  name: Front Room
+  entities:
+    - light.dmx1
+
 #examples:
 #
 #entry:

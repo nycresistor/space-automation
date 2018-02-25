@@ -4,6 +4,7 @@
 default_view:
   view: yes
   entities:
+    - group.front_room
     - media_player.nyc_resistor
     - group.status_card
     - group.themes_card

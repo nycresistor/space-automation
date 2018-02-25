@@ -119,9 +119,15 @@ sensor:
     state_topic: "/18fe34d44eb8/sensor/humidity"
     unit_of_measurent: '%'
 
+light:
+  - platform: mqtt
+    name: "dmx1"
+    brightness_state_topic: "/5ccf7f0e35b1/dmx1/state" 
+    brightness_command_topic: "/5ccf7f0e35b1/dmx1/brightness" 
+
 # Text to speech
 tts:
-  #- platform: google
+  - platform: google
 
 # Cloud
 cloud:
