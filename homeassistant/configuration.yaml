@@ -79,7 +79,7 @@ conversation:
 history:
 
 history_graph:
-  gr1:
+  climate_graph:
     entities:
       -sensor.temperature
       -sensor.humidity
@@ -111,15 +111,15 @@ sun:
 sensor yr:
   - platform: yr
 
-sensor temperature:
+sensor:
   - platform: mqtt
     name: "Temperature"
     state_topic: "/18fe34d44eb8/sensor/temperature"
-
-sensor humidity:
+    unit_of_measurent: 'ºC'
   - platform: mqtt
     name: "Humidity"
     state_topic: "/18fe34d44eb8/sensor/humidity"
+    unit_of_measurent: '%'
 
 # Text to speech
 tts:
