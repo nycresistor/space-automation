@@ -2,6 +2,32 @@
 # should look.  You can set the icons, what tiles/cards are displayed, etc.
 #
 # for icons goto: https://materialdesignicons.com/
+# mdi:ceiling-light
+# mdi:cctv
+# mdi:air-conditioner
+# mdi:fan
+# mdi:fan-off
+# mdi:projector
+
+climate:
+  icon: mdi:fan
+
+light.dmx1:
+  icon: mdi:ceiling-light
+light.dmx2:
+  icon: mdi:ceiling-light
+light.dmx3:
+  icon: mdi:ceiling-light
+light.dmx4:
+  icon: mdi:ceiling-light
+light.dmx5:
+  icon: mdi:ceiling-light
+light.dmx6:
+  icon: mdi:ceiling-light
+light.dmx7:
+  icon: mdi:ceiling-light
+light.dmx8:
+  icon: mdi:ceiling-light
 
 # examples:
 #
