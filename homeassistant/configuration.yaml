@@ -103,10 +103,8 @@ sun:
 
 # Spotify
 # example
-#media_player:
-# - platform: spotify
-#    client_id: !secret spotify_id
-#    client_secret: !secret spotify_secret
+media_player:
+  - platform: cast
 
 # Weather prediction from yr.no which is the Norwegian Meterological Inst.
 sensor yr:
