@@ -104,8 +104,6 @@ sun:
 # Spotify
 # example
 media_player:
-  - platform: cast
-    host: "NYC Resistor"
 
 # Weather prediction from yr.no which is the Norwegian Meterological Inst.
 sensor yr:

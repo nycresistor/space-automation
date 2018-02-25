@@ -4,7 +4,7 @@
 default_view:
   view: yes
   entities:
-    - media_player.cast
+    - media_player.nyc_resistor
     - group.status_card
     - group.themes_card
 
