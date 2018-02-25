@@ -122,6 +122,7 @@ sensor:
 light:
   - platform: mqtt
     name: "dmx1"
+    command_topic: "/5ccf7f0e35b1/dmx1/status" 
     brightness_state_topic: "/5ccf7f0e35b1/dmx1/state" 
     brightness_command_topic: "/5ccf7f0e35b1/dmx1/brightness" 
 
