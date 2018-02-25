@@ -48,9 +48,10 @@ wifi_connect()
 typedef void (*thing_callback_t)(const char * topic, const uint8_t * msg, size_t len);
 
 #define MAX_TOPICS 16
+#define TOPIC_LEN 64
 
 static int topic_count;
-static char topic_names[MAX_TOPICS][32];
+static char topic_names[MAX_TOPICS][TOPIC_LEN];
 static thing_callback_t topic_callbacks[MAX_TOPICS];
 
 void
@@ -77,6 +78,9 @@ mqtt_connect()
 	Serial.println(" success");
 	for(int i = 0 ; i < topic_count ; i++)
 		mqtt.subscribe(topic_names[i]);
+
+	Serial.print(topic_count);
+	Serial.println(" subscribed topics");
 }
 
 
@@ -101,12 +105,12 @@ thing_subscribe(
 
 	va_list ap;
 	va_start(ap, fmt);
-	vsnprintf(buf+14, 32 - 14, fmt, ap);
+	vsnprintf(buf+14, TOPIC_LEN - 14, fmt, ap);
 	va_end(ap);
 
 	mqtt.subscribe(buf);
 
-	Serial.print("SUBSCRIBE ");
+	Serial.print("SUBSCRIBE: ");
 	Serial.println(buf);
 	topic_count++;
 }
@@ -122,7 +126,7 @@ mqtt_callback(
 	unsigned int len
 )
 {
-	Serial.print("MQTT: ");
+	Serial.print("RECEIVE: ");
 	Serial.print(topic);
 	Serial.print("='");
 	Serial.write(payload, len);
@@ -176,7 +180,7 @@ thing_publish(
 	...
 )
 {
-	char topic[32];
+	char topic[TOPIC_LEN];
 	char msg[32];
 
 	snprintf(topic, sizeof(topic), "/%s/%s", device_id, user_topic);
@@ -185,6 +189,7 @@ thing_publish(
 	vsnprintf(msg, sizeof(msg), fmt, ap);
 	va_end(ap);
 
+	Serial.print("PUBLISH: ");
 	Serial.print(topic);
 	Serial.print("=");
 	Serial.println(msg);
