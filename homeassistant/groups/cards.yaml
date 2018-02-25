@@ -18,7 +18,7 @@ themes_card:
 status_card:
   name: Space Status
   entities:
-  - climate_graph
+  - history_graph.climate_graph
 
 # example:
 #
