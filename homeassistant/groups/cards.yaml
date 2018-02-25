@@ -4,8 +4,10 @@
 default_view:
   view: yes
   entities:
-    - group.themes_card
+    - group.front_room
+    - media_player.nyc_resistor
     - group.status_card
+    - group.themes_card
 
 ## The cards
 
@@ -17,7 +19,7 @@ themes_card:
 status_card:
   name: Space Status
   entities:
-  - climate_graph
+  - history_graph.climate_graph
 
 # example:
 #

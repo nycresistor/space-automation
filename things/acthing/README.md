@@ -4,37 +4,42 @@ More info: https://trmm.net/AC_controller
 
 Each time the button is pressed it sends the command twice.
 
+```
      3440 us               430       430    430
     +------------+         +--+      +--+   +--+
  ___|            |_________|  |______|  |___|  |___
                  430+1320    1 = 1320  0=430
- *
- * The DHT22 pinout is
- *   ___________
- *  /           \
- * /______O______\
- * |             |
- * |             |
- * |             |
- * |   AM2302    |
- * +-------------+
- *  |   |   |   |
- * Vcc Data NC Gnd
- *
+```
+_(if the graph looks funny make your window wider)_
 
-The device listens for MQTT commands or serial port commands to
-send the OFF command.  Sample Home Assistant yaml configuration:
+```
+ 
+  The DHT22 pinout is
+    ___________
+   /           \
+  /______O______\
+  |             |
+  |             |
+  |             |
+  |   AM2302    |
+  +-------------+
+   |   |   |   |
+  Vcc Data NC Gnd
+ 
+```
 
-	Configuration (HA):
-	sensor temperature:
-	  platform: mqtt
-	  state_topic: '/18fe34d44eb8/sensor/temperature'
-	  name: 'Temperature'
-	  unit_of_measurent: 'ºC'
+The device listens for MQTT commands or serial port commands to send the OFF command.  Sample Home Assistant yaml configuration:
 
-	sensor humidity:
-	  platform: mqtt
-	  state_topic: '/18fe34d44eb8/sensor/humidity'
-	  name: 'Humidity'
-	  unit_of_measurent: '%'
+Configuration (HA):
 
+```yaml
+sensor:
+  - platform: mqtt
+  	name: 'Temperature'
+  	state_topic: '/18fe34d44eb8/sensor/temperature'
+  	unit_of_measurent: 'ºC'
+  - platform: mqtt
+    name: 'Humidity'
+    state_topic: '/18fe34d44eb8/sensor/humidity'
+    unit_of_measurent: '%'
+```
