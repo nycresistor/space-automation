@@ -28,12 +28,12 @@ config:
 
 #### this needs a model number, it's an Axis 124 PTX Network Camera
 # Shopbot Cam
-#axis:
-#  host: !secret shopbot_host
-#  username: !secret shopbot_user
-#  password: !secret shopbot_pw
-#  include:
-#  - camera
+axis:
+  host: !secret shopbot_host
+  username: !secret shopbot_user
+  password: !secret shopbot_pw
+  include:
+  - camera
   
 # Enable MQ Telemetry Transport protocol
 mqtt:
