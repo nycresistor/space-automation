@@ -14,10 +14,6 @@ climate.left_ac:
 climate.right_ac:
   icon: mdi:fan
 
-front_room_lights:
-  friendly_name: Front Room Lights
-  icon: mdi:lightbulb
-
 light.dragon:
   icon: mdi:ceiling-light
 light.table:
