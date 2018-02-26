@@ -24,8 +24,16 @@ frontend:
 config:
 
 # Enable ios app integration (I think)
-ios:
+#ios:
 
+# Shopbot Cam
+axis:
+  host: !secret shopbot_host
+  username: !secret shopbot_user
+  password: !secret shopbot_pw
+  include:
+  - camera
+  
 # Enable MQ Telemetry Transport protocol
 mqtt:
 #  embedded: 
