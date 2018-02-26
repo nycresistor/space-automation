@@ -35,7 +35,8 @@ config:
 #  include:
 #  - camera
 
-# the entry above didn't work, trying this one
+# the entry above just produces errors
+# this one doesn't produce errors, but it also doesn't display the video
 camera:
   - platform: mjpeg
     name: shopbotcam
