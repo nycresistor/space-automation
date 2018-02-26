@@ -9,26 +9,25 @@
 # mdi:fan-off
 # mdi:projector
 
+media_player:
+  friendly_name: NYC Resistor Chromecast
+
 climate.left_ac:
   icon: mdi:fan
 climate.right_ac:
   icon: mdi:fan
 
-light.dmx1:
+light.dragon:
   icon: mdi:ceiling-light
-light.dmx2:
+light.table:
   icon: mdi:ceiling-light
-light.dmx3:
+light.couch:
   icon: mdi:ceiling-light
-light.dmx4:
+light.kitchen_cluster:
   icon: mdi:ceiling-light
-light.dmx5:
+light.high:
   icon: mdi:ceiling-light
-light.dmx6:
-  icon: mdi:ceiling-light
-light.dmx7:
-  icon: mdi:ceiling-light
-light.dmx8:
+light.cubesvile:
   icon: mdi:ceiling-light
 
 # examples:

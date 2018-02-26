@@ -1,16 +1,24 @@
 # File for general groups of things by room or component type
 #
-front_room:
-  name: Front Room
+dmx:
   entities:
-    - light.dmx1
-    - light.dmx2
-    - light.dmx3
-    - light.dmx4
+    - light.dragon
+    - light.table
+    - light.couch
+    - light.kitchen_cluster
     - light.dmx5
-    - light.dmx6
-    - light.dmx7
+    - light.high
+    - light.cubesville
     - light.dmx8
+
+front_room_lights:
+  entities:
+    - light.dragon
+    - light.table
+    - light.couch
+    - light.kitchen_cluster
+    - light.high
+    - light.cubesville
 
 climate:
   name: "Air conditioning"

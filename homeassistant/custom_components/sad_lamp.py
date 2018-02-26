@@ -1,6 +1,8 @@
-#
-# This is here as an example
-#
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+'''
+   This is here as an example
+'''
 
 import homeassistant.loader as loader
 
@@ -10,6 +12,7 @@ DEPENDENCIES = ['mqtt']
 
 CONF_TOPIC = 'sad_lamp'
 DEFAULT_TOPIC = 'home-assistant/sad_lamp'
+
 
 def setup(hass, config):
     """Set up the SAD lamp component."""
@@ -24,9 +27,9 @@ def setup(hass, config):
 
     # Subscribe our listener to a topic
     mqtt.subscribe(hass, topic, message_received)
-    
+
     # Set the initial state
-    hass.states.set(entity_id, 'No messages') 
+    hass.states.set(entity_id, 'No messages')
 
     # Service to publish a message on MQTT
     def set_state_service(call):
