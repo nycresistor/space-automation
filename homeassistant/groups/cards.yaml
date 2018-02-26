@@ -6,7 +6,7 @@ default_view:
   entities:
     - group.front_room_lights_card
     - media_player.nyc_resistor
-    - group.status_card
+    - group.climate_card
     - group.themes_card
 
 ## The cards
@@ -21,8 +21,8 @@ themes_card:
   entities:
     - input_select.frontend_theme
 
-status_card:
-  name: Space Status
+climate_card:
+  name: Climate
   entities:
     - climate.left_ac 
     - climate.right_ac 
