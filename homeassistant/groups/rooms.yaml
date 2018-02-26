@@ -12,6 +12,8 @@ dmx:
     - light.dmx8
 
 front_room_lights:
+  name: "Front Room Lights"
+  icon: mdi:lightbulb
   entities:
     - light.dragon
     - light.table
