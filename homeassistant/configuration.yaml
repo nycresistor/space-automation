@@ -82,8 +82,8 @@ history_graph:
   climate_graph:
     name: "Climate"
     entities:
-      - sensor.temperature
-      - sensor.humidity
+      - sensor.laser_room_temperature
+      - sensor.laser_room_humidity
 
 # View all events in a logbook
 logbook:
@@ -111,11 +111,11 @@ sensor yr:
 
 sensor:
   - platform: mqtt
-    name: "Temperature"
+    name: "Laser Room Temperature"
     state_topic: "/18fe34d44eb8/sensor/temperature"
     unit_of_measurent: 'ºC'
   - platform: mqtt
-    name: "Humidity"
+    name: "Laser Room Humidity"
     state_topic: "/18fe34d44eb8/sensor/humidity"
     unit_of_measurent: '%'
 
@@ -228,7 +228,8 @@ climate:
       - "HEAT"
       - "COOL"
       - "OFF"
-    current_temperature_topic: /5ccf7f006806/aircon/temperature
+    current_temperature_topic: /5ccf7f006806/sensor/temperature
+    current_humidity_topic: /5ccf7f006806/sensor/humidity
     mode_command_topic: /5ccf7f006806/aircon/status
     mode_state_topic: /5ccf7f006806/aircon/state
   - platform: mqtt
@@ -237,6 +238,7 @@ climate:
       - "HEAT"
       - "COOL"
       - "OFF"
-    current_temperature_topic: /5ccf7f0068df/aircon/temperature
+    current_temperature_topic: /5ccf7f0068df/sensor/temperature
+    current_humidity_topic: /5ccf7f0068df/sensor/humidity
     mode_command_topic: /5ccf7f0068df/aircon/status
     mode_state_topic: /5ccf7f0068df/aircon/state

@@ -9,7 +9,9 @@
 # mdi:fan-off
 # mdi:projector
 
-climate:
+climate.left_ac:
+  icon: mdi:fan
+climate.right_ac:
   icon: mdi:fan
 
 light.dmx1:
