@@ -9,9 +9,6 @@
 # mdi:fan-off
 # mdi:projector
 
-media_player:
-  friendly_name: NYC Resistor Chromecast
-
 climate.left_ac:
   icon: mdi:fan
 climate.right_ac:

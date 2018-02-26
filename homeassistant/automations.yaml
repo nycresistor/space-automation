@@ -60,22 +60,22 @@
       name: "{{ states.input_select.frontend_theme.state }}"
 
 # Front door all off
-- alias: 'all off'
-  trigger:
-    platform: binary_sensor
-    entity_id: binary_sensor.front_door
-    from: "ON"
-    to: "OFF"
-  action:
-    - service: climate.set_operation_mode
-      entity_id: climate.left_ac
-      operation_mode: "OFF"
-    - service: climate.set_operation_mode
-      entity_id: climate.right_ac
-      operation_mode: "OFF"
-    - service: light.turn_off
-      entity_id: light.door_blue
-    - service: light.turn_off
-      entity_id: light.door_red
-    - service: light.turn_off
-      entity_id: light.dmx2
+#- alias: 'all off'
+#  trigger:
+#    platform: mqtt
+#    entity_id: binary_sensor.front_door
+#    from: "ON"
+#    to: "OFF"
+#  action:
+#    - service: climate.set_operation_mode
+#      entity_id: climate.left_ac
+#      operation_mode: "OFF"
+#    - service: climate.set_operation_mode
+#      entity_id: climate.right_ac
+#      operation_mode: "OFF"
+#    - service: light.turn_off
+#      entity_id: light.door_blue
+#    - service: light.turn_off
+#      entity_id: light.door_red
+#    - service: light.turn_off
+#      entity_id: light.dmx2
