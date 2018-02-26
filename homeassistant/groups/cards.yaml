@@ -4,23 +4,29 @@
 default_view:
   view: yes
   entities:
-    - group.front_room
+    - group.front_room_lights_card
     - media_player.nyc_resistor
     - group.status_card
     - group.themes_card
-    - group.climate
 
 ## The cards
 
-themes_card:
-  name: Themes
+front_room_lights_card:
+  name: Front Room Lights
   entities:
-  - input_select.frontend_theme
+    - group.front_room_lights
+
+themes_card:
+  name: UI Themes
+  entities:
+    - input_select.frontend_theme
 
 status_card:
   name: Space Status
   entities:
-  - history_graph.climate_graph
+    - climate.left_ac 
+    - climate.right_ac 
+    - history_graph.climate_graph
 
 # example:
 #
