@@ -37,12 +37,12 @@ config:
 
 # the entry above just produces errors
 # this one doesn't produce errors, but it also doesn't display the video
-camera:
-  - platform: mjpeg
-    name: shopbotcam
-    mjpeg_url: !secret shopbotcam_host
-    username: !secret shopbotcam_user
-    password: !secret shopbotcam_pw
+#camera:
+#  - platform: mjpeg
+#    name: shopbotcam
+#    mjpeg_url: !secret shopbotcam_host
+#    username: !secret shopbotcam_user
+#    password: !secret shopbotcam_pw
   
 # Enable MQ Telemetry Transport protocol
 mqtt:
