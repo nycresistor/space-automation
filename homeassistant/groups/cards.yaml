@@ -6,7 +6,6 @@ default_view:
   entities:
     - group.front_room_lights_card
     - media_player.nyc_resistor
-    - camera.shopbotcam
     - group.climate_card
     - group.themes_card
 
