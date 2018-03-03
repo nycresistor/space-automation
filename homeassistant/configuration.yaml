@@ -26,14 +26,14 @@ config:
 # Enable ios app integration (I think)
 #ios:
 
-#### this needs a model number, it's an Axis 124 PTX Network Camera
 # Shopbot Cam
-#axis:
-#  host: !secret shopbot_host
-#  username: !secret shopbot_user
-#  password: !secret shopbot_pw
-#  include:
-#  - camera
+axis:
+  m10651w:
+    host: !secret shopbotcam_host
+    username: !secret shopbotcam_user
+    password: !secret shopbotcam_pw
+    include:
+      - camera
 
 # the entry above just produces errors
 # this one doesn't produce errors, but it also doesn't display the video
