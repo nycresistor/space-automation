@@ -32,6 +32,7 @@ axis:
     host: !secret shopbotcam_host
     username: !secret shopbotcam_user
     password: !secret shopbotcam_pw
+    cgi: "axis-cgi-foooooobar"
     include:
       - camera
 
