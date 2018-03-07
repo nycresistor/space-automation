@@ -2,7 +2,8 @@
 
 ## Hexascroller
 
-Hexascroller stuff is on golden in `/opt/hexa` and `/etc/systemd/system/hexascroller.service`
+Hexascroller is on its own Raspberry Pi Zero W. You can shell to it:
+ssh pi@hexascroller.local
 
 # Light settings
 
