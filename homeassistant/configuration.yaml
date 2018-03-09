@@ -28,14 +28,17 @@ config:
 #ios:
 
 # Shopbot Cam
-axis:
-  m10651w:
-    host: !secret shopbotcam_host
+
+camera:
+  - platform: mjpeg
+    name: Shopbot Cam
+    mjpeg_url: http://192.168.1.27/axis-cgi/mjpg/video.cgi
     username: !secret shopbotcam_user
     password: !secret shopbotcam_pw
-    cgi: "axis-cgi-foooooobar"
-    include:
-      - camera
+
+#  m10651w:
+#    cgi: "axis-cgi-foooooobar"
+#  host: !secret shopbotcam_host
 
 # the entry above just produces errors
 # this one doesn't produce errors, but it also doesn't display the video
@@ -48,6 +51,8 @@ axis:
   
 # Enable MQ Telemetry Transport protocol
 mqtt:
+  discovery: true
+  discovery_prefix: homeassistant
 #  embedded: 
 #    listeners:
 #      default:
