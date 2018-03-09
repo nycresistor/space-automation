@@ -9,6 +9,7 @@ default_view:
     - group.climate_card
     - group.themes_card
     - camera.shopbot_cam
+    - light.hexascroller
 
 ## The cards
 

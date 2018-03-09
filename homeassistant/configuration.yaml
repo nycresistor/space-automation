@@ -22,7 +22,7 @@ frontend:
   themes: !include_dir_merge_named themes/
 
 # Enables configuration UI
-config:
+#config:
 
 # Enable ios app integration (I think)
 #ios:
@@ -145,6 +145,10 @@ sensor:
     unit_of_measurent: '%'
 
 light:
+  - platform: mqtt
+    name: "hexascroller"
+    command_topic: "/hexascroller/power/command"
+    state_topic: "/hexascroller/power/status"
   - platform: mqtt
     name: "dragon"
     command_topic: "/5ccf7f0e35b1/dmx1/command" 
