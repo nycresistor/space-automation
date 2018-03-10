@@ -36,19 +36,6 @@ camera:
     username: !secret shopbotcam_user
     password: !secret shopbotcam_pw
 
-#  m10651w:
-#    cgi: "axis-cgi-foooooobar"
-#  host: !secret shopbotcam_host
-
-# the entry above just produces errors
-# this one doesn't produce errors, but it also doesn't display the video
-#camera:
-#  - platform: mjpeg
-#    name: shopbotcam
-#    mjpeg_url: !secret shopbotcam_host
-#    username: !secret shopbotcam_user
-#    password: !secret shopbotcam_pw
-  
 # Enable MQ Telemetry Transport protocol
 mqtt:
   discovery: true
@@ -96,6 +83,8 @@ updater:
 # Discover some devices automatically
 # commenting out to try to not have *everything* show up on the dashboard
 discovery:
+  ignore:
+    - axis
 
 # Allows you to issue voice commands from the frontend in enabled browsers
 conversation:
@@ -209,12 +198,6 @@ cloud:
 #  platform: mqtt
 #remote climate2:
 #  platform: mqtt
-
-#light:
-#  - platform: mqtt
-#    name: "Sad Lamp"
-#    command_topic: "hass/feeds/sad-lamp.command"
-#    state_topic: "hass/feeds/sad-lamp.state"
 
 input_select: !include input_select.yaml
 
