@@ -18,8 +18,7 @@ go to [http://192.168.1.32:1880](http://192.168.1.32:1880) in your browser.  _Th
 
 ![Schematic](media/schematic.jpg)
 
-The brains of the system live on a Raspberry Pi behind the laser
-room door, connected to the monitor on the wall.
+The brains of the system live on a Raspberry Pi behind the laser room door, connected to the monitor on the wall.  The monitor is displaying a Chromium tab in kiosk mode serving just the Node-RED UI.  It will open Chromium to this page automatically on reboot.
 
 You can ssh into the pi, the password is in LastPass:
 
@@ -34,6 +33,8 @@ All the "Things" scattered around the space communicate with the Pi via [MQTT](h
 Node-RED listens for the messages and updates the UI, and it sends out control messages in response to button presses on the UI.
 
 ## Starting and Stopping the Services
+
+Everything is set up to start up automatically when the Pi boots, so if things are borked it's always fine to just reboot the Pi.
 
 The Mosquitto broker:
 ```
