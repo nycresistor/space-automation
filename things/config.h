@@ -6,7 +6,7 @@
 #if 1
 #define WIFI_SSID	"NYCR24"
 #define WIFI_PASSWORD	"clubmate"
-#define MQTT_SERVER	"automation.local"
+#define MQTT_SERVER	"192.168.1.32"
 #else
 #define WIFI_SSID	""
 #define WIFI_PASSWORD	""
