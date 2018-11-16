@@ -32,6 +32,8 @@ All the "Things" scattered around the space communicate with the Pi via [MQTT](h
 
 Node-RED listens for the messages and updates the UI, and it sends out control messages in response to button presses on the UI.
 
+The flows in the pallette are all stored as a json file: `/home/pi/.node-red/flows_raspberrypi.json`.  A recent (hopefully the most recent) working copy is checked into this repo.
+
 ## Starting and Stopping the Services
 
 Everything is set up to start up automatically when the Pi boots, so if things are borked it's always fine to just reboot the Pi.
