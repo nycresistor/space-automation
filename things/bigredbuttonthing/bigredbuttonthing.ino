@@ -121,42 +121,92 @@ void loop()
 	const unsigned button_state = digitalRead(BUTTON_PIN);
 
 	// omg someone is pressing the button!
-	if (button_state != 0) {
+	if (last_press == button_state)
+	{
+		// nothing to do
+	} else
+	if (button_state == 0) {
+		last_press = button_state;
 		// report via mqtt
 		char topic[32];
 		snprintf(topic, sizeof(topic), "bigred/command");
 		thing_publish(topic, "%s", "OFF");
+
 		// run the animation
 		all_off_pixel_sequence();
+	} else {
+		last_press = button_state;
 	}
 
-	idle_pixel_sequence();
+	if (button_state != 0)
+		idle_pixel_sequence();
 }
 
 void idle_pixel_sequence() {
+	static unsigned cursor;
+	static unsigned cursor_offset;
+	static unsigned last_cursor;
+	static unsigned last_brightness;
+
 	for (int i = 0; i < NUM_PIXELS; i++) 
-		strip.setPixelColor(i, idle_brightness, idle_brightness, idle_brightness);
+		strip.setPixelColor(i, 0, 0, 0);
 
-	strip.show();
-	delay(10);
+	if (cursor <= NUM_PIXELS*2)
+	{
+		// draw from the slow one to the fast one
+		for (int i = cursor/2 ; i < cursor ; i++)
+			strip.setPixelColor((i+cursor_offset) % NUM_PIXELS, idle_brightness/8, 0, 128);
+	} else {
+		// clear from the fast one to the slow one
+		for (int i = cursor-2*NUM_PIXELS ; i < cursor/2 ; i++)
+			strip.setPixelColor((i+cursor_offset) % NUM_PIXELS, idle_brightness/8, 0, 128);
+	}
 	
-	idle_brightness += idle_direction;
+	strip.show();
 
-	if (idle_brightness == 255)
-		idle_direction = -1;
-	else if (idle_brightness == 0)
-		idle_direction = +1;
+	const unsigned now = millis();
+
+	if (now - last_cursor > (1000 / NUM_PIXELS))
+	{
+		last_cursor = now;
+		cursor = (cursor + 1) % (4 * NUM_PIXELS);
+		if (cursor == 0)
+			cursor_offset--;
+	}
+	
+	if (now - last_brightness > 100)
+	{
+		last_brightness = now;
+		idle_brightness += idle_direction;
+
+		if (idle_brightness > 128)
+			idle_direction = -1;
+		else if (idle_brightness == 0)
+			idle_direction = +1;
+	}
 }
 
 void all_off_pixel_sequence()
 {
-	for (int i = 0; i < 4; i++) {
+	for (int i = 0; i < 3; i++) {
 		for (int i = 0; i < NUM_PIXELS; i++) 
 			strip.setPixelColor(i, 255, 255, 255);
-		delay(10);
+		strip.show();
+		delay(150);
 		for (int i = 0; i < NUM_PIXELS; i++) 
 			strip.setPixelColor(i, 0, 0, 0);
-		delay(10);
+		strip.show();
+		delay(150);
+
+		for (int i = 0; i < NUM_PIXELS; i++) 
+			strip.setPixelColor(i, 255, 255, 255);
+		strip.show();
+		delay(150);
+
+		for (int i = 0; i < NUM_PIXELS; i++) 
+			strip.setPixelColor(i, 0, 0, 0);
+		strip.show();
+		delay(300);
 	}	
 	
 }
