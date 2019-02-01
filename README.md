@@ -1,24 +1,36 @@
 # Space Automation for NYC Resistor
 
-## Quick Guide
+## Usage
 
-**See the dashboard** and turn things on and off: 
+Scan the QR code on the dashboard screen (by the laser room) to get the dashboard on your phone so you can push the buttons.  You can also go to the url shown on the screen:
 
-go to [http://192.168.1.32:1880/ui](http://192.168.1.32:1880/ui) in your browser.  _This only works if you're in the space and on the NYCR24 wifi_.
+[http://192.168.1.32:1880/ui](http://192.168.1.32:1880/ui) _This only works if you're in the space and on the NYCR24 wifi_.
 
 ![Dashboard](media/ui_dashboard.png)
 
-**Edit the UI** to do different things or see how it works:
+## Hack it! 
 
-go to [http://192.168.1.32:1880](http://192.168.1.32:1880) in your browser.  _This only works if you're in the space and on the NYCR24 wifi_.
+The beating heart of the system is a [Node Red](https://nodered.org) server running on a Raspberry Pi in the laser room.  Node Red is a flow-based programming environment that makes it easy to tell networked things how to interact with each other.  
+
+The flows can be viewed in a browser.  This is important:  **there is currently no real version control, and there is no undo**.  Whenever I make changes I copy the flow file from the Pi to this repo and push the changes.  If you mess things up, you can grab the last known good file from here.  I would highly recommend you make a habit of saving copies of the flow file as you work until we figure out a versioning system for this.  Also, simultaneous editing will probably cause chaos since there is only the one view, lol, have fun with that.  To see and edit the flows just strip the `ui` part off the url:
+
+[http://192.168.1.32:1880](http://192.168.1.32:1880) _This only works if you're in the space and on the NYCR24 wifi_.
 
 ![Pallette](media/node_pallette.png)
 
 ## Infrastructure and Maintenance
 
-![Schematic](media/schematic.jpg)
+![Schematic](media/schematic.png)
 
-The brains of the system live on a Raspberry Pi behind the laser room door, connected to the monitor on the wall.  The monitor is displaying a Chromium tab in kiosk mode serving just the Node-RED UI.  It will open Chromium to this page automatically on reboot.
+Except for the motion sensor-controlled lights (in the laser room and restroom), everything connects back to the Node Red server running on the Pi.  
+
+The newest members of the family are an [Ikea Tradfri](https://www.ikea.com/us/en/catalog/categories/departments/lighting/36812/) hub and its four children:  two smart plugs and the bulbs in two desk lamps (at the soldering station and the craft table).
+
+The round lantern lights hanging from the ceiling are all connected to a DMX controller, which is being controlled by an ESP microcontroller board.  The ESP talks [MQTT](http://mqtt.org) back to Node Red, and receives commands from Node Red also via MQTT.
+
+The same goes for the two ESP boards associated with the AC units.  They send IR signal to the AC units' remote receivers, and communicate via MQTT back to Node Red.  The All Off button by the door is also controlled by an ESP board via MQTT.
+
+There's a screen displaying the Node Red dashboard on the wall by the laser room.  It's plugged directly into the Pi, and it's running the dashboard in a Chromium tab in kiosk mode.  If the Pi is rebooted the Node Red and MQTT servers come back up automatically, and the monitor will automatically show the dashboard.
 
 You can ssh into the pi, the password is in LastPass:
 
@@ -26,9 +38,7 @@ You can ssh into the pi, the password is in LastPass:
 $ ssh pi@192.168.1.32
 ```
 
-The display is built with [Node-RED](https://nodered.org), a flow-based language for passing messages between networked devices by every imaginable protocol. 
-
-All the "Things" scattered around the space communicate with the Pi via [MQTT](http://mqtt.org).  There's an [MQTT Mosquitto Broker](https://mosquitto.org) (server) running on the Pi as a central hub for these messages.  There's a detailed section on MQTT below.
+To make changes to the system you'll want to get familiar with [Node-RED](https://nodered.org) and [MQTT](http://mqtt.org).  There's an [MQTT Mosquitto Broker](https://mosquitto.org) (server) running on the Pi as a central hub for these messages.  There's a detailed section on MQTT below.
 
 Node-RED listens for the messages and updates the UI, and it sends out control messages in response to button presses on the UI.
 
